@@ -16,13 +16,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Reconstruct recovered licensed baseline
+        shell: bash
+        run: |
+          mkdir -p app/src/main/assets
+          cat source/baseline/index.html.gz.b64.* | base64 --decode | gzip -dc > app/src/main/assets/index.html
+          echo "4a4e077b2b0e730191af902b63fa626fb10d4d1836cd40ef66b00e1d5df76494  app/src/main/assets/index.html" | sha256sum -c -
+          test "$(wc -c < app/src/main/assets/index.html)" -eq 66599
+
       - name: Validate licensed baseline
         shell: bash
         run: |
-          test -f app/src/main/assets/index.html
           grep -q "Activación PARKOPS" app/src/main/assets/index.html
           ! grep -qiE 'QR Nequi|id="celular"|id="mCel"|3114980095' app/src/main/assets/index.html
           grep -q "activateLicense" app/src/main/java/com/solvex/parkops/MainActivity.java
+          grep -q "ANDROID_ID" app/src/main/java/com/solvex/parkops/MainActivity.java
 
       - uses: actions/setup-java@v4
         with:
@@ -43,6 +51,7 @@ jobs:
           cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.1.0.apk
           cp tools/license_generator.py release/license_generator.py
           cp keys/solvex_license_public.pem release/solvex_license_public.pem
+          cp docs/LICENSE-CONTROL.md release/LICENSE-CONTROL.md
           sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.1.0.apk > release/PARKOPS-SOLVEX-LICENSED-v1.1.0.sha256
 
       - uses: actions/upload-artifact@v4
