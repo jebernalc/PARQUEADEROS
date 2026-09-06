@@ -6,3 +6,6 @@ local.properties
 *.jks
 *.keystore
 keystore.properties
+solvex_license_private.pem
+**/solvex_license_private.pem
+PRIVATE_DO_NOT_COMMIT/
