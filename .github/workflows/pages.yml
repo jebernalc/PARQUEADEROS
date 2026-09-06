@@ -43,9 +43,10 @@ jobs:
           test -f dist/index.html
           test -f dist/admin/index.html
           test -f dist/owner/index.html
-          grep -q "PARKOPS ADMIN" dist/admin/index.html
-          grep -q "SOLVEX MASTER" dist/owner/index.html
+          grep -q "data-console=\"admin\"" dist/admin/index.html
+          grep -q "data-console=\"owner\"" dist/owner/index.html
           grep -q "owner_dashboard" dist/app.js
+          grep -q "issue_license" dist/app.js
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
