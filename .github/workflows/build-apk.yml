@@ -44,6 +44,19 @@ jobs:
       - name: Build installable Android APK
         run: gradle assembleDebug --no-daemon
 
+      - name: Verify compiled APK internals
+        shell: bash
+        run: |
+          APK=app/build/outputs/apk/debug/app-debug.apk
+          test -f "$APK"
+          unzip -p "$APK" assets/index.html | sha256sum | grep -q '^4a4e077b2b0e730191af902b63fa626fb10d4d1836cd40ef66b00e1d5df76494'
+          unzip -l "$APK" | grep -q 'AndroidManifest.xml'
+          FOUND=0
+          while read -r dex; do
+            if unzip -p "$APK" "$dex" | strings | grep -q 'Lcom/solvex/parkops/MainActivity;'; then FOUND=1; break; fi
+          done < <(unzip -Z1 "$APK" | grep -E '^classes[0-9]*\.dex$')
+          test "$FOUND" -eq 1
+
       - name: Package release files
         shell: bash
         run: |
