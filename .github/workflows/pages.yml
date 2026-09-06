@@ -1,9 +1,10 @@
-name: Publicar PARKOPS Web Consoles
+name: Publicar PARKOPS Real Web
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
+      - "source/real-app/**"
       - "web/**"
       - ".github/workflows/pages.yml"
 permissions:
@@ -18,35 +19,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Preparar configuración pública
+      - name: Reconstruir aplicación web autoritativa
         shell: bash
-        env:
-          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
         run: |
           mkdir -p dist
-          cp -R web/. dist/
-          if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_ANON_KEY" ]; then
-            python3 - <<'PY'
-          from pathlib import Path
-          import os
-          p=Path('dist/config.js')
-          s=p.read_text()
-          s=s.replace('__SUPABASE_URL__',os.environ['SUPABASE_URL']).replace('__SUPABASE_ANON_KEY__',os.environ['SUPABASE_ANON_KEY'])
-          p.write_text(s)
-          PY
-          else
-            echo "::warning::Configure repository variables SUPABASE_URL and SUPABASE_ANON_KEY to enable login."
-          fi
-      - name: Validar portales
-        run: |
-          test -f dist/index.html
-          test -f dist/admin/index.html
-          test -f dist/owner/index.html
-          grep -q "data-console=\"admin\"" dist/admin/index.html
-          grep -q "data-console=\"owner\"" dist/owner/index.html
-          grep -q "owner_dashboard" dist/app.js
-          grep -q "issue_license" dist/app.js
+          cat source/real-app/index.html.gz.b64.* | base64 --decode | gzip -dc > dist/index.html
+          echo "ca465ce85dcdd084aee889972e931716366ae8402ac48e1f562a05e709d26407  dist/index.html" | sha256sum -c -
+          test "$(wc -c < dist/index.html)" -eq 64455
+          ! grep -q '3114980095' dist/index.html
+          ! grep -qi 'qr_nequi.jpg' dist/index.html
+          ! grep -qi 'QR Nequi' dist/index.html
+          grep -q 'Registrar ingreso' dist/index.html
+          grep -q 'id="celular"' dist/index.html
+          grep -q 'Recibo por WhatsApp' dist/index.html
+
+          # Conservar las consolas administrativas en rutas separadas sin alterar la app principal.
+          if [ -d web/admin ]; then mkdir -p dist/admin && cp -R web/admin/. dist/admin/; fi
+          if [ -d web/owner ]; then mkdir -p dist/owner && cp -R web/owner/. dist/owner/; fi
+          for f in web/app.js web/styles.css web/config.js; do [ -f "$f" ] && cp "$f" dist/; done
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
