@@ -9,6 +9,7 @@
     "vite": "latest",
     "react": "latest",
     "react-dom": "latest",
+    "@supabase/supabase-js": "^2.57.4",
     "recharts": "latest",
     "lucide-react": "latest"
   },
