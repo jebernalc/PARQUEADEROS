@@ -1,0 +1,68 @@
+name: Build SOLVEX Owner License Manager APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "ownerapp/**"
+      - "settings.gradle"
+      - ".github/workflows/build-owner-apk.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-owner:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate owner license manager security model
+        shell: bash
+        run: |
+          grep -q 'applicationId "com.solvex.parkops.owner"' ownerapp/build.gradle
+          grep -q 'issue_license' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
+          grep -q 'owner_bootstrap' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
+          grep -q 'ANDROID_ID enviado por el comprador' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
+          grep -q 'ENVIAR POR WHATSAPP' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
+          ! grep -R -q 'BEGIN PRIVATE KEY' ownerapp
+          ! grep -R -q 'SOLVEX_LICENSE_PRIVATE_KEY' ownerapp
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+
+      - name: Build owner APK
+        run: gradle :ownerapp:assembleDebug --no-daemon
+
+      - name: Verify compiled owner APK
+        shell: bash
+        run: |
+          APK=ownerapp/build/outputs/apk/debug/ownerapp-debug.apk
+          test -f "$APK"
+          unzip -l "$APK" | grep -q 'AndroidManifest.xml'
+          FOUND=0
+          while read -r dex; do
+            if unzip -p "$APK" "$dex" | strings | grep -q 'com/solvex/parkops/owner/MainActivity'; then FOUND=1; break; fi
+          done < <(unzip -Z1 "$APK" | grep -E '^classes[0-9]*\.dex$')
+          test "$FOUND" -eq 1
+          ! unzip -Z1 "$APK" | grep -qi 'private.*key'
+
+      - name: Package owner release
+        shell: bash
+        run: |
+          mkdir -p release-owner
+          cp ownerapp/build/outputs/apk/debug/ownerapp-debug.apk release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.0.0.apk
+          sha256sum release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.0.0.apk > release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.0.0.sha256
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SOLVEX-OWNER-LICENSE-MANAGER-v1.0.0
+          path: release-owner/
+          if-no-files-found: error
