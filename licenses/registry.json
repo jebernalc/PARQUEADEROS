@@ -1,0 +1,6 @@
+{
+  "schema": "PARKOPS-LICENSE-REGISTRY-v1",
+  "application": "com.solvex.parkops",
+  "notes": "Registro auditable de licencias emitidas. No contiene la clave privada RSA. Las licencias completas solo deben almacenarse en un repositorio privado o gestor seguro.",
+  "licenses": []
+}
