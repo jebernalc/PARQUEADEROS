@@ -1,0 +1,1 @@
+# SOLVEX Owner License Manager
