@@ -1,6 +1,8 @@
 package com.solvex.parkops;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +33,7 @@ import java.security.spec.X509EncodedKeySpec;
 
 public class MainActivity extends Activity {
     private WebView webView;
+    private AndroidBridge bridge;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +64,8 @@ public class MainActivity extends Activity {
         settings.setMediaPlaybackRequiresUserGesture(true);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
 
-        webView.addJavascriptInterface(new AndroidBridge(this), "AndroidBridge");
+        bridge = new AndroidBridge(this);
+        webView.addJavascriptInterface(bridge, "AndroidBridge");
         webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
@@ -81,7 +85,33 @@ public class MainActivity extends Activity {
                 openExternal(uri, uri.getHost() == null ? "" : uri.getHost()); return true;
             }
         });
+
+        if (bridge.hasValidLicense()) loadLicensedApp(); else loadActivationScreen();
+    }
+
+    private void loadLicensedApp() {
         webView.loadUrl("file:///android_asset/index.html");
+    }
+
+    private void loadActivationScreen() {
+        String html = "<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>" +
+                "<title>Activación PARKOPS</title><style>" +
+                "*{box-sizing:border-box}body{margin:0;background:#14171c;color:#f3f5f7;font-family:Arial,sans-serif;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:24px}" +
+                ".card{width:min(620px,100%);background:#1c2128;border:1px solid #343b44;border-radius:20px;padding:28px;box-shadow:0 20px 60px #0008}" +
+                "h1{margin:0 0 8px;font-size:28px}.brand{color:#5fd38d;font-weight:800}.muted{color:#a9b2bd;line-height:1.5}" +
+                ".idbox{margin:20px 0;background:#11151a;border:1px solid #343b44;border-radius:12px;padding:14px;font-family:monospace;word-break:break-all;font-size:16px}" +
+                "textarea{width:100%;min-height:120px;margin-top:10px;background:#11151a;color:#fff;border:1px solid #46505c;border-radius:12px;padding:14px;font-size:14px;resize:vertical}" +
+                "button{width:100%;border:0;border-radius:12px;padding:14px 16px;font-size:16px;font-weight:700;cursor:pointer;margin-top:12px;background:#5fd38d;color:#0d1710}" +
+                "button.secondary{background:#2a313a;color:#fff;border:1px solid #46505c}.msg{margin-top:14px;min-height:24px;color:#ffcf66}.ok{color:#69e39b}</style></head><body>" +
+                "<div class='card'><div class='brand'>SOLVEX SYSTEM JB</div><h1>Activación PARKOPS</h1>" +
+                "<p class='muted'>Esta instalación requiere una licencia individual vinculada a este dispositivo. Envíe el ID mostrado al administrador de licencias y pegue aquí la licencia recibida.</p>" +
+                "<div class='muted'>ID DEL DISPOSITIVO</div><div id='device' class='idbox'></div>" +
+                "<button class='secondary' onclick='AndroidBridge.copyDeviceId()'>Copiar ID del dispositivo</button>" +
+                "<label class='muted' style='display:block;margin-top:20px'>LICENCIA</label><textarea id='license' placeholder='Pegue aquí la licencia PARKOPS'></textarea>" +
+                "<button onclick='activate()'>Activar esta instalación</button><div id='msg' class='msg'></div></div>" +
+                "<script>document.getElementById('device').textContent=AndroidBridge.getDeviceId();function activate(){var k=document.getElementById('license').value.trim();var r=AndroidBridge.activateLicense(k);var m=document.getElementById('msg');m.textContent=r.substring(r.indexOf('|')+1);if(r.indexOf('OK|')===0){m.className='msg ok';setTimeout(function(){AndroidBridge.openLicensedApp()},500)}else{m.className='msg'}}</script>" +
+                "</body></html>";
+        webView.loadDataWithBaseURL("https://activation.local/", html, "text/html", "UTF-8", null);
     }
 
     private void openExternal(Uri uri, String host) {
@@ -113,6 +143,12 @@ public class MainActivity extends Activity {
             return (id == null || id.trim().isEmpty()) ? "unknown-device" : id;
         }
 
+        @JavascriptInterface public void copyDeviceId() {
+            ClipboardManager cm = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("PARKOPS Device ID", getDeviceId()));
+            ((Activity) context).runOnUiThread(() -> Toast.makeText(context, "ID del dispositivo copiado", Toast.LENGTH_SHORT).show());
+        }
+
         @JavascriptInterface public boolean hasValidLicense() {
             String key = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_LICENSE, "");
             return validateLicenseInternal(key).startsWith("OK|");
@@ -123,6 +159,11 @@ public class MainActivity extends Activity {
             String result = validateLicenseInternal(clean);
             if (result.startsWith("OK|")) context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(KEY_LICENSE, clean).apply();
             return result;
+        }
+
+        @JavascriptInterface public void openLicensedApp() {
+            if (!hasValidLicense()) return;
+            ((Activity) context).runOnUiThread(() -> ((MainActivity) context).loadLicensedApp());
         }
 
         private String validateLicenseInternal(String key) {
