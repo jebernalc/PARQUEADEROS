@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - "ownerapp/**"
+      - "supabase/functions/parkops-master/**"
       - "settings.gradle"
       - ".github/workflows/build-owner-apk.yml"
 
@@ -22,10 +23,15 @@ jobs:
         shell: bash
         run: |
           grep -q 'applicationId "com.solvex.parkops.owner"' ownerapp/build.gradle
+          grep -q 'versionName "1.1.0"' ownerapp/build.gradle
+          grep -q 'create_owner_customer' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
           grep -q 'issue_license' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
           grep -q 'owner_bootstrap' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
-          grep -q 'ANDROID_ID enviado por el comprador' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
-          grep -q 'ENVIAR POR WHATSAPP' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
+          grep -q 'Buscar por nombre, celular, ID dispositivo o licencia' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
+          grep -q 'REENVIAR ESTA LICENCIA POR WHATSAPP' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
+          grep -q 'wa.me/' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
+          grep -q "action==='create_owner_customer'" supabase/functions/parkops-master/index.ts
+          grep -q 'license_key:key' supabase/functions/parkops-master/index.ts
           ! grep -R -q 'BEGIN PRIVATE KEY' ownerapp
           ! grep -R -q 'SOLVEX_LICENSE_PRIVATE_KEY' ownerapp
 
@@ -58,11 +64,11 @@ jobs:
         shell: bash
         run: |
           mkdir -p release-owner
-          cp ownerapp/build/outputs/apk/debug/ownerapp-debug.apk release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.0.0.apk
-          sha256sum release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.0.0.apk > release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.0.0.sha256
+          cp ownerapp/build/outputs/apk/debug/ownerapp-debug.apk release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.1.0.apk
+          sha256sum release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.1.0.apk > release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.1.0.sha256
 
       - uses: actions/upload-artifact@v4
         with:
-          name: SOLVEX-OWNER-LICENSE-MANAGER-v1.0.0
+          name: SOLVEX-OWNER-LICENSE-MANAGER-v1.1.0
           path: release-owner/
           if-no-files-found: error
