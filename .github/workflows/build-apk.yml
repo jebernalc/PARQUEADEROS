@@ -1,4 +1,4 @@
-name: Build PARKOPS Real APK
+name: Build PARKOPS Licensed APK v1.3.0
 
 on:
   workflow_dispatch:
@@ -24,7 +24,7 @@ jobs:
           test "$(wc -c < app/src/main/assets/index.html)" -eq 64455
           rm -f app/src/main/assets/qr_nequi.jpg
 
-      - name: Validate real baseline and privacy cleanup
+      - name: Validate app, privacy and license gate
         shell: bash
         run: |
           grep -q "Registrar ingreso" app/src/main/assets/index.html
@@ -34,8 +34,12 @@ jobs:
           ! grep -q '3114980095' app/src/main/assets/index.html
           ! grep -qi 'qr_nequi.jpg' app/src/main/assets/index.html
           ! grep -qi 'QR Nequi' app/src/main/assets/index.html
-          grep -q "activateLicense" app/src/main/java/com/solvex/parkops/MainActivity.java
+          grep -q "Activación PARKOPS" app/src/main/java/com/solvex/parkops/MainActivity.java
+          grep -q "if (bridge.hasValidLicense()) loadLicensedApp(); else loadActivationScreen();" app/src/main/java/com/solvex/parkops/MainActivity.java
           grep -q "ANDROID_ID" app/src/main/java/com/solvex/parkops/MainActivity.java
+          grep -q "La licencia pertenece a otro dispositivo" app/src/main/java/com/solvex/parkops/MainActivity.java
+          grep -q 'versionName "1.3.0"' app/build.gradle
+          test -f licenses/registry.json
 
       - uses: actions/setup-java@v4
         with:
@@ -68,14 +72,15 @@ jobs:
         shell: bash
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-REAL-v1.2.0.apk
+          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.3.0.apk
           cp tools/license_generator.py release/license_generator.py
           cp keys/solvex_license_public.pem release/solvex_license_public.pem
+          cp licenses/registry.json release/license-registry.json
           cp docs/LICENSE-CONTROL.md release/LICENSE-CONTROL.md
-          sha256sum release/PARKOPS-SOLVEX-REAL-v1.2.0.apk > release/PARKOPS-SOLVEX-REAL-v1.2.0.sha256
+          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.3.0.apk > release/PARKOPS-SOLVEX-LICENSED-v1.3.0.sha256
 
       - uses: actions/upload-artifact@v4
         with:
-          name: PARKOPS-SOLVEX-REAL-v1.2.0
+          name: PARKOPS-SOLVEX-LICENSED-v1.3.0
           path: release/
           if-no-files-found: error
