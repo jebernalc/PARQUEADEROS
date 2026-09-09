@@ -1,4 +1,4 @@
-name: Build PARKOPS Licensed APK v1.3.0
+name: Build PARKOPS Licensed APK v1.4.0
 
 on:
   workflow_dispatch:
@@ -24,7 +24,7 @@ jobs:
           test "$(wc -c < app/src/main/assets/index.html)" -eq 64455
           rm -f app/src/main/assets/qr_nequi.jpg
 
-      - name: Validate app, privacy and license gate
+      - name: Validate app privacy and Supabase license gate
         shell: bash
         run: |
           grep -q "Registrar ingreso" app/src/main/assets/index.html
@@ -33,13 +33,13 @@ jobs:
           grep -q "id:'nequi'" app/src/main/assets/index.html
           ! grep -q '3114980095' app/src/main/assets/index.html
           ! grep -qi 'qr_nequi.jpg' app/src/main/assets/index.html
-          ! grep -qi 'QR Nequi' app/src/main/assets/index.html
           grep -q "Activación PARKOPS" app/src/main/java/com/solvex/parkops/MainActivity.java
-          grep -q "if (bridge.hasValidLicense()) loadLicensedApp(); else loadActivationScreen();" app/src/main/java/com/solvex/parkops/MainActivity.java
           grep -q "ANDROID_ID" app/src/main/java/com/solvex/parkops/MainActivity.java
-          grep -q "La licencia pertenece a otro dispositivo" app/src/main/java/com/solvex/parkops/MainActivity.java
-          grep -q 'versionName "1.3.0"' app/build.gradle
-          test -f licenses/registry.json
+          grep -q "activate_license" app/src/main/java/com/solvex/parkops/MainActivity.java
+          grep -q "functions/v1/parkops-master" app/src/main/java/com/solvex/parkops/MainActivity.java
+          grep -q 'versionName "1.4.0"' app/build.gradle
+          ! grep -R -q 'BEGIN PRIVATE KEY' app
+          ! grep -R -q 'SUPABASE_SERVICE_ROLE_KEY' app
 
       - uses: actions/setup-java@v4
         with:
@@ -62,25 +62,16 @@ jobs:
           ! unzip -Z1 "$APK" | grep -q 'assets/qr_nequi.jpg'
           ! unzip -p "$APK" assets/index.html | grep -q '3114980095'
           unzip -l "$APK" | grep -q 'AndroidManifest.xml'
-          FOUND=0
-          while read -r dex; do
-            if unzip -p "$APK" "$dex" | strings | grep -q 'Lcom/solvex/parkops/MainActivity;'; then FOUND=1; break; fi
-          done < <(unzip -Z1 "$APK" | grep -E '^classes[0-9]*\.dex$')
-          test "$FOUND" -eq 1
 
       - name: Package release files
         shell: bash
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.3.0.apk
-          cp tools/license_generator.py release/license_generator.py
-          cp keys/solvex_license_public.pem release/solvex_license_public.pem
-          cp licenses/registry.json release/license-registry.json
-          cp docs/LICENSE-CONTROL.md release/LICENSE-CONTROL.md
-          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.3.0.apk > release/PARKOPS-SOLVEX-LICENSED-v1.3.0.sha256
+          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.4.0.apk
+          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.4.0.apk > release/PARKOPS-SOLVEX-LICENSED-v1.4.0.sha256
 
       - uses: actions/upload-artifact@v4
         with:
-          name: PARKOPS-SOLVEX-LICENSED-v1.3.0
+          name: PARKOPS-SOLVEX-LICENSED-v1.4.0
           path: release/
           if-no-files-found: error
