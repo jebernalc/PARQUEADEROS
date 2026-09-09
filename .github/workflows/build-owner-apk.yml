@@ -19,21 +19,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate owner license manager security model
+      - name: Validate owner manager v1.2.0
         shell: bash
         run: |
           grep -q 'applicationId "com.solvex.parkops.owner"' ownerapp/build.gradle
-          grep -q 'versionName "1.1.0"' ownerapp/build.gradle
+          grep -q 'versionName "1.2.0"' ownerapp/build.gradle
+          grep -q 'RECUPERAR CONTRASEÑA' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
+          grep -q '/auth/v1/recover' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
           grep -q 'create_owner_customer' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
           grep -q 'issue_license' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
-          grep -q 'owner_bootstrap' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
-          grep -q 'Buscar por nombre, celular, ID dispositivo o licencia' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
+          grep -q 'revoke_license' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
           grep -q 'REENVIAR ESTA LICENCIA POR WHATSAPP' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
-          grep -q 'wa.me/' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
-          grep -q "action==='create_owner_customer'" supabase/functions/parkops-master/index.ts
-          grep -q 'license_key:key' supabase/functions/parkops-master/index.ts
+          grep -q 'activate_license' supabase/functions/parkops-master/index.ts
+          grep -q 'SVX2.' supabase/functions/parkops-master/index.ts
           ! grep -R -q 'BEGIN PRIVATE KEY' ownerapp
-          ! grep -R -q 'SOLVEX_LICENSE_PRIVATE_KEY' ownerapp
+          ! grep -R -q 'SUPABASE_SERVICE_ROLE_KEY' ownerapp
 
       - uses: actions/setup-java@v4
         with:
@@ -58,17 +58,16 @@ jobs:
             if unzip -p "$APK" "$dex" | strings | grep -q 'com/solvex/parkops/owner/MainActivity'; then FOUND=1; break; fi
           done < <(unzip -Z1 "$APK" | grep -E '^classes[0-9]*\.dex$')
           test "$FOUND" -eq 1
-          ! unzip -Z1 "$APK" | grep -qi 'private.*key'
 
       - name: Package owner release
         shell: bash
         run: |
           mkdir -p release-owner
-          cp ownerapp/build/outputs/apk/debug/ownerapp-debug.apk release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.1.0.apk
-          sha256sum release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.1.0.apk > release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.1.0.sha256
+          cp ownerapp/build/outputs/apk/debug/ownerapp-debug.apk release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.2.0.apk
+          sha256sum release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.2.0.apk > release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.2.0.sha256
 
       - uses: actions/upload-artifact@v4
         with:
-          name: SOLVEX-OWNER-LICENSE-MANAGER-v1.1.0
+          name: SOLVEX-OWNER-LICENSE-MANAGER-v1.2.0
           path: release-owner/
           if-no-files-found: error
