@@ -33,7 +33,11 @@ jobs:
           grep -q 'id="celular"' dist/index.html
           grep -q 'Recibo por WhatsApp' dist/index.html
 
-          # Conservar las consolas administrativas en rutas separadas sin alterar la app principal.
+          # Capa operativa: cero impresoras, recibos digitales WhatsApp y configuración.
+          cp web/digital-receipts.js dist/digital-receipts.js
+          sed -i 's#</body>#<script src="./digital-receipts.js"></script></body>#' dist/index.html
+          grep -q 'digital-receipts.js' dist/index.html
+
           if [ -d web/admin ]; then mkdir -p dist/admin && cp -R web/admin/. dist/admin/; fi
           if [ -d web/owner ]; then mkdir -p dist/owner && cp -R web/owner/. dist/owner/; fi
           for f in web/app.js web/styles.css web/config.js; do [ -f "$f" ] && cp "$f" dist/; done
