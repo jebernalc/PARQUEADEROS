@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
     private static final int BG=Color.rgb(20,23,28), CARD=Color.rgb(28,33,40), TEXT=Color.WHITE, MUTED=Color.LTGRAY;
     private static final String SUPABASE_URL="https://epadzsrfsvckyjugcvpd.supabase.co";
     private static final String PUBLISHABLE_KEY="sb_publishable_PxFa4vMqovqCIDOwEsoiBQ_2q2jETc_";
-    private static final String DEFAULT_EMAIL="jebernalc2036@gmail.com";
+    private static final String DEFAULT_EMAIL="jbernalcristancho82@hotmail.com";
     private final ExecutorService io=Executors.newSingleThreadExecutor();
     private LinearLayout root;
     private String token="";
@@ -55,23 +55,60 @@ public class MainActivity extends Activity {
     private LinearLayout card(){LinearLayout c=new LinearLayout(this);c.setOrientation(LinearLayout.VERTICAL);c.setPadding(18,14,18,14);c.setBackgroundColor(CARD);LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);lp.setMargins(0,8,0,8);c.setLayoutParams(lp);return c;}
 
     private void showLogin(){
-        shell();root.addView(txt("SOLVEX · OWNER LICENSE MANAGER",25));TextView s=txt("Administración privada de clientes y licencias PARKOPS",14);s.setTextColor(MUTED);root.addView(s);
-        EditText email=input("Correo del propietario"),pass=input("Contraseña");pass.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        shell();
+        root.addView(txt("SOLVEX · OWNER LICENSE MANAGER",25));
+        TextView s=txt("Transición de propietario a la nueva cuenta Hotmail",14);s.setTextColor(MUTED);root.addView(s);
+        EditText email=input("Correo del propietario"),pass=input("Contraseña");
+        pass.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD);
         email.setText(getPreferences(MODE_PRIVATE).getString("email",DEFAULT_EMAIL));
         root.addView(email);root.addView(pass);
-        Button login=btn("INGRESAR COMO PROPIETARIO"),recover=btn("RECUPERAR CONTRASEÑA");root.addView(login);root.addView(recover);
-        TextView info=txt("La conexión con Supabase ya está configurada. Solo necesitas tu correo y contraseña.",13);info.setTextColor(MUTED);root.addView(info);
+        Button login=btn("INGRESAR COMO PROPIETARIO"),signup=btn("CREAR / ACTIVAR NUEVA CUENTA"),recover=btn("RECUPERAR CONTRASEÑA");
+        root.addView(login);root.addView(signup);root.addView(recover);
+        TextView info=txt("Cuenta autorizada para la transición: "+DEFAULT_EMAIL+". Crea una contraseña aquí; no necesitas compartirla con nadie.",13);info.setTextColor(MUTED);root.addView(info);
         login.setOnClickListener(v->{String em=email.getText().toString().trim(),pw=pass.getText().toString();if(em.isEmpty()||pw.isEmpty()){toast("Completa correo y contraseña");return;}getPreferences(MODE_PRIVATE).edit().putString("email",em).apply();login.setEnabled(false);io.execute(()->login(em,pw));});
+        signup.setOnClickListener(v->{String em=email.getText().toString().trim(),pw=pass.getText().toString();if(em.isEmpty()||pw.length()<8){toast("Usa el correo autorizado y una contraseña de mínimo 8 caracteres");return;}signup.setEnabled(false);io.execute(()->signupOwner(em,pw,signup));});
         recover.setOnClickListener(v->{String em=email.getText().toString().trim();if(em.isEmpty()){toast("Escribe el correo del propietario");return;}recover.setEnabled(false);io.execute(()->recoverPassword(em,recover));});
     }
 
+    private void signupOwner(String email,String password,Button button){
+        try{
+            JSONObject r=request("POST",SUPABASE_URL+"/auth/v1/signup",new JSONObject().put("email",email).put("password",password),false);
+            token=r.optString("access_token","");
+            if(token.isEmpty()){
+                toast("Cuenta creada. Revisa Hotmail y confirma el correo; después vuelve a INGRESAR.");
+            }else{
+                JSONObject claim=master(new JSONObject().put("action","claim_owner_account"));
+                if(claim.has("error"))throw new Exception(claim.optString("error"));
+                getPreferences(MODE_PRIVATE).edit().putString("email",email).apply();
+                toast("Nueva cuenta propietaria activada correctamente");
+                loadDashboard();
+            }
+        }catch(Exception e){toast("No se pudo crear/activar la cuenta: "+e.getMessage());}
+        finally{runOnUiThread(()->button.setEnabled(true));}
+    }
+
     private void recoverPassword(String email,Button button){
-        try{request("POST",SUPABASE_URL+"/auth/v1/recover",new JSONObject().put("email",email),false);toast("Correo de recuperación solicitado. Revisa la bandeja de entrada y spam de "+email+".");}
+        try{request("POST",SUPABASE_URL+"/auth/v1/recover",new JSONObject().put("email",email),false);toast("Correo de recuperación solicitado. Revisa la bandeja y spam de "+email+".");}
         catch(Exception e){toast("No se pudo solicitar la recuperación: "+e.getMessage());}
         finally{runOnUiThread(()->button.setEnabled(true));}
     }
 
-    private void login(String email,String password){try{JSONObject r=request("POST",SUPABASE_URL+"/auth/v1/token?grant_type=password",new JSONObject().put("email",email).put("password",password),false);token=r.optString("access_token","");if(token.isEmpty())throw new Exception(r.optString("error_description",r.optString("msg","No se pudo iniciar sesión")));JSONObject boot=master(new JSONObject().put("action","owner_bootstrap"));if(boot.has("error"))throw new Exception(boot.optString("error"));loadDashboard();}catch(Exception e){toast("Acceso rechazado: "+e.getMessage());runOnUiThread(this::showLogin);}}
+    private void login(String email,String password){
+        try{
+            JSONObject r=request("POST",SUPABASE_URL+"/auth/v1/token?grant_type=password",new JSONObject().put("email",email).put("password",password),false);
+            token=r.optString("access_token","");
+            if(token.isEmpty())throw new Exception(r.optString("error_description",r.optString("msg","No se pudo iniciar sesión")));
+            JSONObject boot=master(new JSONObject().put("action","owner_bootstrap"));
+            if(boot.has("error") && DEFAULT_EMAIL.equalsIgnoreCase(email)){
+                JSONObject claim=master(new JSONObject().put("action","claim_owner_account"));
+                if(claim.has("error"))throw new Exception(claim.optString("error"));
+                boot=master(new JSONObject().put("action","owner_bootstrap"));
+            }
+            if(boot.has("error"))throw new Exception(boot.optString("error"));
+            getPreferences(MODE_PRIVATE).edit().putString("email",email).apply();
+            loadDashboard();
+        }catch(Exception e){toast("Acceso rechazado: "+e.getMessage());runOnUiThread(this::showLogin);}
+    }
 
     private void loadDashboard() throws Exception{
         JSONObject d=master(new JSONObject().put("action","owner_dashboard"));if(d.has("error"))throw new Exception(d.optString("error"));organizations.clear();licenses.clear();JSONArray oa=d.optJSONArray("organizations"),la=d.optJSONArray("licenses");if(oa!=null)for(int i=0;i<oa.length();i++)organizations.add(oa.getJSONObject(i));if(la!=null)for(int i=0;i<la.length();i++)licenses.add(la.getJSONObject(i));JSONObject metrics=d.optJSONObject("metrics");runOnUiThread(()->showHome(metrics));
