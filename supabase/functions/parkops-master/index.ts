@@ -25,6 +25,9 @@ const addDays = (days: number) => {
   d.setUTCDate(d.getUTCDate() + days);
   return isoDate(d);
 };
+const PREAUTHORIZED_OWNER_EMAILS = new Set([
+  'jbernalcristancho82@hotmail.com',
+]);
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -67,6 +70,15 @@ Deno.serve(async (req) => {
     const userClient = createClient(url, anon, { global: { headers: { Authorization: auth } } });
     const { data: { user }, error: userError } = await userClient.auth.getUser();
     if (userError || !user) return json({ error: 'Unauthorized' }, 401);
+
+    if (action === 'claim_owner_account') {
+      const email = clean(user.email).toLowerCase();
+      if (!PREAUTHORIZED_OWNER_EMAILS.has(email)) return json({ error: 'Este correo no está autorizado como propietario' }, 403);
+      const { error } = await admin.from('platform_owners').upsert({ user_id: user.id, active: true }, { onConflict: 'user_id' });
+      if (error) throw error;
+      return json({ ok: true, email, user_id: user.id });
+    }
+
     const { data: ownerRow } = await admin.from('platform_owners').select('user_id').eq('user_id', user.id).eq('active', true).maybeSingle();
     if (!ownerRow) return json({ error: 'Forbidden' }, 403);
 
