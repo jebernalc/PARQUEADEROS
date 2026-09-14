@@ -97,7 +97,7 @@ jobs:
           grep -q "edge('save_site_configuration'" dist/admin/app.js
           grep -q 'Sedes autorizadas' dist/admin/index.html
           grep -q 'Medios de pago' dist/admin/index.html
-          grep -q 'parkops-web-v1.5.3-cloud-r2' dist/sw.js
+          grep -q 'parkops-web-v1.5.3-cloud-r3' dist/sw.js
           test -f dist/version.json
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
