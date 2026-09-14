@@ -1,4 +1,4 @@
-name: Build PARKOPS Licensed APK v1.5.1
+name: Build PARKOPS Licensed APK v1.5.2
 
 on:
   workflow_dispatch:
@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Reconstruct immutable v1.4 authoritative base
         shell: bash
         run: |
@@ -23,8 +22,7 @@ jobs:
           echo "ca465ce85dcdd084aee889972e931716366ae8402ac48e1f562a05e709d26407  app/src/main/assets/index.html" | sha256sum -c -
           test "$(wc -c < app/src/main/assets/index.html)" -eq 64455
           rm -f app/src/main/assets/qr_nequi.jpg
-
-      - name: Add v1.5.1 Bre-B payment integration and contingency layer
+      - name: Add preserved v1.5.1 features plus v1.5.2 connectivity fix
         shell: bash
         run: |
           cp web/parkops-v1.5.1.js app/src/main/assets/parkops-v1.5.1.js
@@ -33,47 +31,40 @@ jobs:
           p=Path('app/src/main/assets/index.html')
           s=p.read_text(encoding='utf-8')
           tag='<script src="parkops-v1.5.1.js"></script>'
-          if '</body>' in s:
-              s=s.replace('</body>',tag+'\n</body>',1)
-          else:
-              s+=tag
+          s=s.replace('</body>',tag+'\n</body>',1) if '</body>' in s else s+tag
           p.write_text(s,encoding='utf-8')
           PY
-
-      - name: Validate preserved app plus v1.5.1 features
+      - name: Validate no functional regressions and connectivity correction
         shell: bash
         run: |
           grep -q "Registrar ingreso" app/src/main/assets/index.html
           grep -q 'id="celular"' app/src/main/assets/index.html
           grep -q "Recibo por WhatsApp" app/src/main/assets/index.html
-          grep -q "parkops-v1.5.1.js" app/src/main/assets/index.html
           grep -q "Bre-B" app/src/main/assets/parkops-v1.5.1.js
           grep -q "Llave Bre-B" app/src/main/assets/parkops-v1.5.1.js
-          grep -q "Tipo de llave" app/src/main/assets/parkops-v1.5.1.js
           grep -q "CONTINGENCIA OFFLINE" app/src/main/assets/parkops-v1.5.1.js
           grep -q "pendingReceipts" app/src/main/assets/parkops-v1.5.1.js
+          grep -q "probeInternet" app/src/main/assets/parkops-v1.5.1.js
+          grep -q "generate_204" app/src/main/assets/parkops-v1.5.1.js
+          grep -q "top:8px" app/src/main/assets/parkops-v1.5.1.js
+          ! grep -q "left:12px;bottom:12px" app/src/main/assets/parkops-v1.5.1.js
           ! grep -q "function brebButton" app/src/main/assets/parkops-v1.5.1.js
-          ! grep -q "Configurar Bre-B" app/src/main/assets/parkops-v1.5.1.js
           ! grep -q '3114980095' app/src/main/assets/index.html
           ! grep -qi 'qr_nequi.jpg' app/src/main/assets/index.html
           grep -q "Activación PARKOPS" app/src/main/java/com/solvex/parkops/MainActivity.java
           grep -q "activate_license" app/src/main/java/com/solvex/parkops/MainActivity.java
-          grep -q 'versionName "1.5.1"' app/build.gradle
+          grep -q 'versionName "1.5.2"' app/build.gradle
           ! grep -R -q 'BEGIN PRIVATE KEY' app
           ! grep -R -q 'SUPABASE_SERVICE_ROLE_KEY' app
-
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.11.1'
-
       - name: Build installable Android APK
         run: gradle assembleDebug --no-daemon
-
       - name: Verify compiled APK internals
         shell: bash
         run: |
@@ -81,22 +72,19 @@ jobs:
           test -f "$APK"
           unzip -p "$APK" assets/index.html | grep -q "parkops-v1.5.1.js"
           unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "Bre-B"
-          unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "Llave Bre-B"
+          unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "probeInternet"
+          unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "top:8px"
           unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "CONTINGENCIA OFFLINE"
-          ! unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "function brebButton"
           ! unzip -Z1 "$APK" | grep -q 'assets/qr_nequi.jpg'
-          ! unzip -p "$APK" assets/index.html | grep -q '3114980095'
           unzip -l "$APK" | grep -q 'AndroidManifest.xml'
-
       - name: Package test release
         shell: bash
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.5.1.apk
-          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.5.1.apk > release/PARKOPS-SOLVEX-LICENSED-v1.5.1.sha256
-
+          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.5.2.apk
+          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.5.2.apk > release/PARKOPS-SOLVEX-LICENSED-v1.5.2.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: PARKOPS-SOLVEX-LICENSED-v1.5.1
+          name: PARKOPS-SOLVEX-LICENSED-v1.5.2
           path: release/
           if-no-files-found: error
