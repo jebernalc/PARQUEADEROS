@@ -6,52 +6,24 @@ const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify
 const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
 const queue=()=>read(QUEUE,[]);
 const saveQueue=v=>write(QUEUE,v);
-const online=()=>navigator.onLine!==false;
-const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+let internetOk=navigator.onLine!==false;
+let checking=false;
+const online=()=>internetOk===true;
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[m]));
 function toast(msg){let e=document.getElementById('parkops-v151-toast');if(!e){e=document.createElement('div');e.id='parkops-v151-toast';e.style.cssText='position:fixed;left:50%;bottom:82px;transform:translateX(-50%);z-index:2147483647;background:#111827;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 8px 30px #0005;max-width:90%;font:600 14px system-ui';document.body.appendChild(e)}e.textContent=msg;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',3500)}
-function setStatus(){let b=document.getElementById('parkops-net-status');if(!b){b=document.createElement('button');b.id='parkops-net-status';b.style.cssText='position:fixed;left:12px;bottom:12px;z-index:2147483645;border:0;border-radius:999px;padding:9px 13px;color:white;font:700 12px system-ui;box-shadow:0 5px 20px #0004';b.onclick=openPending;document.body.appendChild(b)}const n=queue().length;b.textContent=online()?`● EN LÍNEA${n?` · ${n} recibo(s) pendiente(s)`:''}`:`● CONTINGENCIA OFFLINE${n?` · ${n} pendiente(s)`:''}`;b.style.background=online()?'#15803d':'#b45309'}
+function setStatus(){let b=document.getElementById('parkops-net-status');if(!b){b=document.createElement('button');b.id='parkops-net-status';b.style.cssText='position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:2147483645;border:0;border-radius:999px;padding:5px 11px;color:white;font:700 11px system-ui;box-shadow:0 3px 12px #0003;max-width:72vw;white-space:nowrap';b.onclick=openPending;document.body.appendChild(b)}const n=queue().length;b.textContent=online()?`● EN LÍNEA${n?` · ${n} pendiente(s)`:''}`:`● CONTINGENCIA OFFLINE${n?` · ${n} pendiente(s)`:''}`;b.style.background=online()?'#15803d':'#b45309'}
+async function probeInternet(){if(checking)return online();checking=true;const previous=internetOk;try{if(navigator.onLine===false){internetOk=false}else{const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),3500);try{await fetch('https://www.gstatic.com/generate_204?parkops='+Date.now(),{method:'GET',mode:'no-cors',cache:'no-store',signal:controller.signal});internetOk=true}catch(e){internetOk=false}finally{clearTimeout(timer)}}}finally{checking=false;setStatus()}if(previous&&!internetOk)toast('Modo contingencia activado. PARKOPS seguirá guardando la operación localmente.');if(!previous&&internetOk&&queue().length){toast('Conexión recuperada. Hay recibos pendientes para enviar.');setTimeout(openPending,500)}return online()}
 function enqueueWhatsApp(url){const q=queue();q.push({id:Date.now()+'-'+Math.random().toString(36).slice(2),url,createdAt:new Date().toISOString()});saveQueue(q);setStatus();toast('Sin conexión: la operación sigue guardada y el recibo quedó pendiente para WhatsApp.');}
 const originalOpen=window.open.bind(window);
 window.open=function(url,...args){const u=String(url||'');if(/^https?:\/\/(wa\.me|api\.whatsapp\.com)\//i.test(u)&&!online()){enqueueWhatsApp(u);return null}return originalOpen(url,...args)};
 function openPending(){const q=queue();document.getElementById('parkops-pending-modal')?.remove();const d=document.createElement('div');d.id='parkops-pending-modal';d.style.cssText='position:fixed;inset:0;background:#0009;z-index:2147483646;display:grid;place-items:center;padding:16px;font-family:system-ui';d.innerHTML=`<div style="background:#fff;color:#111827;border-radius:16px;padding:20px;width:min(620px,100%);max-height:88vh;overflow:auto"><h2 style="margin-top:0">${online()?'Conexión disponible':'Modo contingencia'}</h2><p>${online()?'Puedes enviar ahora los recibos que quedaron pendientes.':'PARKOPS continúa operando y conserva la información localmente. Los recibos quedan disponibles hasta recuperar la conexión.'}</p><h3>Recibos pendientes: ${q.length}</h3>${q.map((x,i)=>`<div style="padding:10px;border:1px solid #e5e7eb;border-radius:10px;margin:8px 0"><b>Recibo ${i+1}</b><br><small>${esc(new Date(x.createdAt).toLocaleString('es-CO'))}</small>${online()?`<br><button data-send="${esc(x.id)}" style="margin-top:7px;padding:8px 12px">Enviar por WhatsApp</button>`:''}</div>`).join('')||'<p>No hay recibos pendientes.</p>'}<button id="pq-close" style="padding:9px 14px">Cerrar</button></div>`;document.body.appendChild(d);d.querySelector('#pq-close').onclick=()=>d.remove();d.querySelectorAll('[data-send]').forEach(b=>b.onclick=()=>{const list=queue(),item=list.find(x=>x.id===b.dataset.send);if(!item)return;originalOpen(item.url,'_blank','noopener');saveQueue(list.filter(x=>x.id!==item.id));d.remove();setStatus();toast('Recibo preparado para enviar por WhatsApp.');});}
-function standardBreb(){
-  if(typeof cfg==='undefined'||!Array.isArray(cfg.medios))return false;
-  let m=cfg.medios.find(x=>String(x.id||'').toLowerCase()==='breb'||/bre-?b/i.test(String(x.n||'')));
-  if(!m){
-    const legacy=read(LEGACY_CFG,{}).breb||{};
-    m={id:'breb',n:'Bre-B',on:true,dato:legacy.keyValue||'',link:'',keyType:legacy.keyType||'',holder:legacy.holder||'',marca:'#111827',txt:'#fff'};
-    const pos=cfg.medios.findIndex(x=>String(x.id||'').toLowerCase()==='daviplata');
-    cfg.medios.splice(pos>=0?pos+1:cfg.medios.length,0,m);
-    if(typeof sCfg==='function')sCfg();
-  }else{
-    m.id='breb';m.n='Bre-B';if(m.on===undefined)m.on=true;if(m.keyType===undefined)m.keyType='';if(m.holder===undefined)m.holder='';if(m.dato===undefined)m.dato='';if(m.link===undefined)m.link='';
-  }
-  return true;
-}
-function decorateBreb(){
-  if(typeof cfg==='undefined'||!Array.isArray(cfg.medios))return;
-  const i=cfg.medios.findIndex(x=>String(x.id||'').toLowerCase()==='breb');if(i<0)return;
-  const chk=document.querySelector(`#mediosPago input[data-i="${i}"][data-c="on"]`);const card=chk?.closest('div[style*="border"]');if(!card||card.dataset.brebReady)return;card.dataset.brebReady='1';
-  const m=cfg.medios[i];
-  const bold=card.querySelector('label b');if(bold)bold.textContent='Bre-B';
-  const fields=card.querySelectorAll('.campo');
-  if(fields[0]){const l=fields[0].querySelector('label');const inp=fields[0].querySelector('input');if(l)l.textContent='Llave Bre-B';if(inp){inp.placeholder='Ej. celular, correo, cédula o llave alfanumérica';inp.value=m.dato||'';}}
-  const body=chk.parentElement?.nextElementSibling;if(!body)return;
-  const extra=document.createElement('div');extra.className='parkops-breb-inline';extra.innerHTML=`<div class="campo" style="margin-bottom:8px"><label>Tipo de llave</label><select id="breb-key-type" style="width:100%;padding:10px"><option value="">Seleccionar</option>${['Celular','Cédula','Correo','Código alfanumérico'].map(x=>`<option value="${x}" ${m.keyType===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="campo" style="margin-bottom:8px"><label>Titular / nombre comercial</label><input id="breb-holder" type="text" value="${esc(m.holder||'')}" placeholder="Nombre del titular de la llave" style="padding:10px"></div><p class="nota" style="margin:4px 0 0">Bre-B funciona como un medio de pago más, igual que Nequi o Daviplata. La aplicación guarda únicamente la llave configurada; nunca solicita claves bancarias.</p>`;
-  const linkField=fields[1];if(linkField)body.insertBefore(extra,linkField);else body.appendChild(extra);
-  extra.querySelector('#breb-key-type').addEventListener('change',e=>{m.keyType=e.target.value;if(typeof sCfg==='function')sCfg();toast('Tipo de llave Bre-B guardado.');});
-  extra.querySelector('#breb-holder').addEventListener('change',e=>{m.holder=e.target.value.trim();if(typeof sCfg==='function')sCfg();toast('Titular Bre-B guardado.');});
-}
-function refreshPaymentUi(){
-  if(!standardBreb())return;
-  if(typeof pintarMedios==='function'){const c=document.getElementById('mediosPago');if(c&&!c.querySelector('input[data-breb-refresh]'))pintarMedios();}
-  decorateBreb();
-  if(typeof pintarMens==='function')pintarMens();
-}
-function enhance(){document.getElementById('parkops-breb-btn')?.remove();refreshPaymentUi();setStatus();}
-window.addEventListener('online',()=>{setStatus();if(queue().length){toast('Conexión recuperada. Hay recibos pendientes para enviar.');setTimeout(openPending,500)}});
-window.addEventListener('offline',()=>{setStatus();toast('Modo contingencia activado. PARKOPS seguirá guardando la operación localmente.')});
-window.ParkopsContingency={isOnline:online,pending:queue,openPending,version:'1.5.1'};
-const obs=new MutationObserver(()=>{document.getElementById('parkops-breb-btn')?.remove();standardBreb();decorateBreb();});obs.observe(document.documentElement,{childList:true,subtree:true});
+function standardBreb(){if(typeof cfg==='undefined'||!Array.isArray(cfg.medios))return false;let m=cfg.medios.find(x=>String(x.id||'').toLowerCase()==='breb'||/bre-?b/i.test(String(x.n||'')));if(!m){const legacy=read(LEGACY_CFG,{}).breb||{};m={id:'breb',n:'Bre-B',on:true,dato:legacy.keyValue||'',link:'',keyType:legacy.keyType||'',holder:legacy.holder||'',marca:'#111827',txt:'#fff'};const pos=cfg.medios.findIndex(x=>String(x.id||'').toLowerCase()==='daviplata');cfg.medios.splice(pos>=0?pos+1:cfg.medios.length,0,m);if(typeof sCfg==='function')sCfg()}else{m.id='breb';m.n='Bre-B';if(m.on===undefined)m.on=true;if(m.keyType===undefined)m.keyType='';if(m.holder===undefined)m.holder='';if(m.dato===undefined)m.dato='';if(m.link===undefined)m.link=''}return true}
+function decorateBreb(){if(typeof cfg==='undefined'||!Array.isArray(cfg.medios))return;const i=cfg.medios.findIndex(x=>String(x.id||'').toLowerCase()==='breb');if(i<0)return;const chk=document.querySelector(`#mediosPago input[data-i="${i}"][data-c="on"]`);const card=chk?.closest('div[style*="border"]');if(!card||card.dataset.brebReady)return;card.dataset.brebReady='1';const m=cfg.medios[i];const bold=card.querySelector('label b');if(bold)bold.textContent='Bre-B';const fields=card.querySelectorAll('.campo');if(fields[0]){const l=fields[0].querySelector('label');const inp=fields[0].querySelector('input');if(l)l.textContent='Llave Bre-B';if(inp){inp.placeholder='Ej. celular, correo, cédula o llave alfanumérica';inp.value=m.dato||''}}const body=chk.parentElement?.nextElementSibling;if(!body)return;const extra=document.createElement('div');extra.className='parkops-breb-inline';extra.innerHTML=`<div class="campo" style="margin-bottom:8px"><label>Tipo de llave</label><select id="breb-key-type" style="width:100%;padding:10px"><option value="">Seleccionar</option>${['Celular','Cédula','Correo','Código alfanumérico'].map(x=>`<option value="${x}" ${m.keyType===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="campo" style="margin-bottom:8px"><label>Titular / nombre comercial</label><input id="breb-holder" type="text" value="${esc(m.holder||'')}" placeholder="Nombre del titular de la llave" style="padding:10px"></div><p class="nota" style="margin:4px 0 0">Bre-B funciona como un medio de pago más, igual que Nequi o Daviplata. La aplicación guarda únicamente la llave configurada; nunca solicita claves bancarias.</p>`;const linkField=fields[1];if(linkField)body.insertBefore(extra,linkField);else body.appendChild(extra);extra.querySelector('#breb-key-type').addEventListener('change',e=>{m.keyType=e.target.value;if(typeof sCfg==='function')sCfg();toast('Tipo de llave Bre-B guardado.')});extra.querySelector('#breb-holder').addEventListener('change',e=>{m.holder=e.target.value.trim();if(typeof sCfg==='function')sCfg();toast('Titular Bre-B guardado.')})}
+function refreshPaymentUi(){if(!standardBreb())return;if(typeof pintarMedios==='function'){const c=document.getElementById('mediosPago');if(c&&!c.querySelector('input[data-breb-refresh]'))pintarMedios()}decorateBreb();if(typeof pintarMens==='function')pintarMens()}
+function enhance(){document.getElementById('parkops-breb-btn')?.remove();refreshPaymentUi();setStatus();probeInternet();setInterval(probeInternet,8000)}
+window.addEventListener('online',()=>probeInternet());
+window.addEventListener('offline',()=>{internetOk=false;setStatus();toast('Modo contingencia activado. PARKOPS seguirá guardando la operación localmente.')});
+window.ParkopsContingency={isOnline:online,checkInternet:probeInternet,pending:queue,openPending,version:'1.5.2'};
+const obs=new MutationObserver(()=>{document.getElementById('parkops-breb-btn')?.remove();standardBreb();decorateBreb()});obs.observe(document.documentElement,{childList:true,subtree:true});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',enhance);else enhance();
 })();
