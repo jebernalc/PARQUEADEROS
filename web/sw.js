@@ -1,5 +1,5 @@
-const CACHE='parkops-web-v1.5.3-cloud-r3';
-const CORE=['./','./index.html','./browser-bridge.js','./parkops-v1.5.1.js','./parkops-web-platform.js','./cloud-sync.js','./manifest.webmanifest','./admin/','./admin/index.html','./admin/app.js'];
+const CACHE='parkops-web-v1.5.3-cloud-r4';
+const CORE=['./','./index.html','./browser-bridge.js','./parkops-v1.5.1.js','./parkops-web-platform.js','./cloud-sync.js','./manifest.webmanifest','./admin/','./admin/index.html','./admin/app.js','./admin/activate.html','./admin/activate.js'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('parkops-web-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',event=>{
