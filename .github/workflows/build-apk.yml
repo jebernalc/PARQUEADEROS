@@ -1,4 +1,4 @@
-name: Build PARKOPS Licensed APK v1.5.0
+name: Build PARKOPS Licensed APK v1.5.1
 
 on:
   workflow_dispatch:
@@ -24,15 +24,15 @@ jobs:
           test "$(wc -c < app/src/main/assets/index.html)" -eq 64455
           rm -f app/src/main/assets/qr_nequi.jpg
 
-      - name: Add v1.5 Bre-B and contingency layer without altering base
+      - name: Add v1.5.1 Bre-B payment integration and contingency layer
         shell: bash
         run: |
-          cp web/parkops-v1.5.js app/src/main/assets/parkops-v1.5.js
+          cp web/parkops-v1.5.1.js app/src/main/assets/parkops-v1.5.1.js
           python3 - <<'PY'
           from pathlib import Path
           p=Path('app/src/main/assets/index.html')
           s=p.read_text(encoding='utf-8')
-          tag='<script src="parkops-v1.5.js"></script>'
+          tag='<script src="parkops-v1.5.1.js"></script>'
           if '</body>' in s:
               s=s.replace('</body>',tag+'\n</body>',1)
           else:
@@ -40,22 +40,25 @@ jobs:
           p.write_text(s,encoding='utf-8')
           PY
 
-      - name: Validate preserved app plus v1.5 features
+      - name: Validate preserved app plus v1.5.1 features
         shell: bash
         run: |
           grep -q "Registrar ingreso" app/src/main/assets/index.html
           grep -q 'id="celular"' app/src/main/assets/index.html
           grep -q "Recibo por WhatsApp" app/src/main/assets/index.html
-          grep -q "parkops-v1.5.js" app/src/main/assets/index.html
-          grep -q "Bre-B" app/src/main/assets/parkops-v1.5.js
-          grep -q "CONTINGENCIA OFFLINE" app/src/main/assets/parkops-v1.5.js
-          grep -q "pendingReceipts" app/src/main/assets/parkops-v1.5.js
-          grep -q "window.addEventListener('online'" app/src/main/assets/parkops-v1.5.js
+          grep -q "parkops-v1.5.1.js" app/src/main/assets/index.html
+          grep -q "Bre-B" app/src/main/assets/parkops-v1.5.1.js
+          grep -q "Llave Bre-B" app/src/main/assets/parkops-v1.5.1.js
+          grep -q "Tipo de llave" app/src/main/assets/parkops-v1.5.1.js
+          grep -q "CONTINGENCIA OFFLINE" app/src/main/assets/parkops-v1.5.1.js
+          grep -q "pendingReceipts" app/src/main/assets/parkops-v1.5.1.js
+          ! grep -q "function brebButton" app/src/main/assets/parkops-v1.5.1.js
+          ! grep -q "Configurar Bre-B" app/src/main/assets/parkops-v1.5.1.js
           ! grep -q '3114980095' app/src/main/assets/index.html
           ! grep -qi 'qr_nequi.jpg' app/src/main/assets/index.html
           grep -q "Activación PARKOPS" app/src/main/java/com/solvex/parkops/MainActivity.java
           grep -q "activate_license" app/src/main/java/com/solvex/parkops/MainActivity.java
-          grep -q 'versionName "1.5.0"' app/build.gradle
+          grep -q 'versionName "1.5.1"' app/build.gradle
           ! grep -R -q 'BEGIN PRIVATE KEY' app
           ! grep -R -q 'SUPABASE_SERVICE_ROLE_KEY' app
 
@@ -76,9 +79,11 @@ jobs:
         run: |
           APK=app/build/outputs/apk/debug/app-debug.apk
           test -f "$APK"
-          unzip -p "$APK" assets/index.html | grep -q "parkops-v1.5.js"
-          unzip -p "$APK" assets/parkops-v1.5.js | grep -q "Bre-B"
-          unzip -p "$APK" assets/parkops-v1.5.js | grep -q "CONTINGENCIA OFFLINE"
+          unzip -p "$APK" assets/index.html | grep -q "parkops-v1.5.1.js"
+          unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "Bre-B"
+          unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "Llave Bre-B"
+          unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "CONTINGENCIA OFFLINE"
+          ! unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "function brebButton"
           ! unzip -Z1 "$APK" | grep -q 'assets/qr_nequi.jpg'
           ! unzip -p "$APK" assets/index.html | grep -q '3114980095'
           unzip -l "$APK" | grep -q 'AndroidManifest.xml'
@@ -87,11 +92,11 @@ jobs:
         shell: bash
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.5.0.apk
-          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.5.0.apk > release/PARKOPS-SOLVEX-LICENSED-v1.5.0.sha256
+          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.5.1.apk
+          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.5.1.apk > release/PARKOPS-SOLVEX-LICENSED-v1.5.1.sha256
 
       - uses: actions/upload-artifact@v4
         with:
-          name: PARKOPS-SOLVEX-LICENSED-v1.5.0
+          name: PARKOPS-SOLVEX-LICENSED-v1.5.1
           path: release/
           if-no-files-found: error
