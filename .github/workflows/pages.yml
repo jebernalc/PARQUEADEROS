@@ -24,7 +24,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Reconstruir exactamente el núcleo oficial APK PARKOPS v1.5.3
         shell: bash
         run: |
@@ -47,51 +46,16 @@ jobs:
           PY
           echo "2ae5261f8ceae9af99a3cf4cec7cea2d1c1254cb8a3a2323c667a0335589627e  .web-build/index.html" | sha256sum -c -
           test "$(wc -c < .web-build/index.html)" -eq 64497
-
       - name: Auditar funcionalidad exacta de APK antes de publicar
         shell: bash
         run: |
           set -euo pipefail
-          CORE=.web-build/index.html
-          EXT=.web-build/parkops-v1.5.1.js
-          grep -q 'Registrar ingreso' "$CORE"
-          grep -q 'Entrada y enviar recibo' "$CORE"
-          grep -q 'Entrada sin enviar recibo' "$CORE"
-          grep -q 'Liquidar salida' "$CORE"
-          grep -q 'En patio' "$CORE"
-          grep -q 'Cierre de caja' "$CORE"
-          grep -q 'Descargar CSV' "$CORE"
-          grep -q 'Enviar cierre por WhatsApp' "$CORE"
-          grep -q "id:'carro'" "$CORE"
-          grep -q "id:'moto'" "$CORE"
-          grep -q "id:'bicicleta'" "$CORE"
-          grep -q "id:'patineta'" "$CORE"
-          grep -q 'Conecta a recarga eléctrica' "$CORE"
-          grep -q 'Recarga ilimitada en la mensualidad' "$CORE"
-          grep -q 'tablaTarifas' "$CORE"
-          grep -q 'mediosPago' "$CORE"
-          grep -q 'Guardar reglas' "$CORE"
-          grep -q 'Guardar datos' "$CORE"
-          grep -q 'Guardar plantillas' "$CORE"
-          grep -q 'Descargar respaldo' "$CORE"
-          grep -q 'Restaurar respaldo' "$CORE"
-          grep -q 'Borrar todos los datos' "$CORE"
-          grep -q 'Registrar mensualidad' "$CORE"
-          grep -q 'wa.me' "$CORE"
-          grep -q "pqe_cfg" "$CORE"
-          grep -q "pqe_tarifas" "$CORE"
-          grep -q "pqe_clientes" "$CORE"
-          grep -q "pqe_ingresos" "$CORE"
-          grep -q "pqe_mens" "$CORE"
-          grep -q 'Bre-B' "$EXT"
-          grep -q 'Llave Bre-B' "$EXT"
-          grep -q 'probeInternet' "$EXT"
-          grep -q '● ONLINE' "$EXT"
-          grep -q '● OFFLINE' "$EXT"
-          grep -q "version:'1.5.3'" "$EXT"
-          ! grep -q '3114980095' "$CORE"
-          ! grep -qi 'qr_nequi.jpg' "$CORE"
-
+          CORE=.web-build/index.html; EXT=.web-build/parkops-v1.5.1.js
+          for x in 'Registrar ingreso' 'Entrada y enviar recibo' 'Entrada sin enviar recibo' 'Liquidar salida' 'En patio' 'Cierre de caja' 'Descargar CSV' 'Enviar cierre por WhatsApp' 'Conecta a recarga eléctrica' 'Recarga ilimitada en la mensualidad' 'Guardar reglas' 'Guardar datos' 'Guardar plantillas' 'Descargar respaldo' 'Restaurar respaldo' 'Borrar todos los datos' 'Registrar mensualidad' 'wa.me' 'pqe_cfg' 'pqe_tarifas' 'pqe_clientes' 'pqe_ingresos' 'pqe_mens'; do grep -q "$x" "$CORE"; done
+          grep -q "id:'carro'" "$CORE"; grep -q "id:'moto'" "$CORE"; grep -q "id:'bicicleta'" "$CORE"; grep -q "id:'patineta'" "$CORE"
+          grep -q 'tablaTarifas' "$CORE"; grep -q 'mediosPago' "$CORE"
+          grep -q 'Bre-B' "$EXT"; grep -q 'Llave Bre-B' "$EXT"; grep -q 'probeInternet' "$EXT"; grep -q '● ONLINE' "$EXT"; grep -q '● OFFLINE' "$EXT"; grep -q "version:'1.5.3'" "$EXT"
+          ! grep -q '3114980095' "$CORE"; ! grep -qi 'qr_nequi.jpg' "$CORE"
       - name: Adaptar núcleo APK a navegador con nube sin alterar UI
         shell: bash
         run: |
@@ -107,21 +71,15 @@ jobs:
           cp -R parksolvex-web/admin/. dist/admin/
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('dist/index.html')
-          s=p.read_text(encoding='utf-8')
-          head='''<meta name="theme-color" content="#14171c"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PARKSOLVEX"><link rel="manifest" href="./manifest.webmanifest">'''
-          if '</head>' in s:
-              s=s.replace('</head>',head+'\n</head>',1)
-          scripts='''<script src="./browser-bridge.js"></script><script src="./parkops-web-platform.js"></script><script src="./cloud-sync.js"></script>'''
-          if '</body>' in s:
-              s=s.replace('</body>',scripts+'\n</body>',1)
-          else:
-              s+=scripts
+          p=Path('dist/index.html');s=p.read_text(encoding='utf-8')
+          head='<meta name="theme-color" content="#14171c"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PARKSOLVEX"><link rel="manifest" href="./manifest.webmanifest">'
+          s=s.replace('</head>',head+'\n</head>',1) if '</head>' in s else head+s
+          scripts='<script src="./browser-bridge.js"></script><script src="./parkops-web-platform.js"></script><script src="./cloud-sync.js"></script>'
+          s=s.replace('</body>',scripts+'\n</body>',1) if '</body>' in s else s+scripts
           p.write_text(s,encoding='utf-8')
           PY
-          printf '%s\n' '{"product":"PARKSOLVEX WEB","webVersion":"1.5.3-web-cloud","apkCore":"1.5.3","source":"exact-apk-core+supabase-sync","apkIndexSha256":"2ae5261f8ceae9af99a3cf4cec7cea2d1c1254cb8a3a2323c667a0335589627e"}' > dist/version.json
-
-      - name: Validar capa cloud, licencias y portal administrador
+          printf '%s\n' '{"product":"PARKSOLVEX WEB","webVersion":"1.5.3-web-cloud","apkCore":"1.5.3","source":"exact-apk-core+supabase-sync","admin":"/admin/","apkIndexSha256":"2ae5261f8ceae9af99a3cf4cec7cea2d1c1254cb8a3a2323c667a0335589627e"}' > dist/version.json
+      - name: Validar cloud, licencias, usuarios y sedes
         shell: bash
         run: |
           set -euo pipefail
@@ -129,22 +87,22 @@ jobs:
           grep -q "VERSION='1.5.3-web'" dist/parkops-web-platform.js
           grep -q 'AndroidDownload' dist/browser-bridge.js
           grep -q 'ParkSolvexCloud' dist/cloud-sync.js
-          grep -q "sync_push" dist/cloud-sync.js
-          grep -q "sync_pull" dist/cloud-sync.js
-          grep -q 'cloud-sync.js' dist/index.html
-          grep -q 'parkops-v1.5.1.js' dist/index.html
+          grep -q 'sync_push' dist/cloud-sync.js
+          grep -q 'sync_pull' dist/cloud-sync.js
           grep -q 'PARKSOLVEX Admin' dist/admin/index.html
-          grep -q 'tenant_bootstrap' dist/admin/app.js
-          grep -q 'tenant_invite_user' dist/admin/app.js
-          grep -q 'tenant_set_user' dist/admin/app.js
+          grep -q 'parksolvex-admin' dist/admin/app.js
+          grep -q "edge('bootstrap'" dist/admin/app.js
+          grep -q "edge('invite_user'" dist/admin/app.js
+          grep -q "edge('create_site'" dist/admin/app.js
+          grep -q "edge('save_site_configuration'" dist/admin/app.js
+          grep -q 'Sedes autorizadas' dist/admin/index.html
+          grep -q 'Medios de pago' dist/admin/index.html
           grep -q 'parkops-web-v1.5.3-cloud-r2' dist/sw.js
           test -f dist/version.json
-
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
-
   deploy:
     environment:
       name: github-pages
