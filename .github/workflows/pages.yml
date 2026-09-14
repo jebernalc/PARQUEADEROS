@@ -1,11 +1,15 @@
-name: Publicar PARKOPS Web v1.5.1
+name: Publicar PARKOPS Web v1.5.3 exacta a APK
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
       - "source/real-app/**"
-      - "web/**"
+      - "web/parkops-v1.5.1.js"
+      - "web/browser-bridge.js"
+      - "web/parkops-web-platform.js"
+      - "web/manifest.webmanifest"
+      - "web/sw.js"
       - ".github/workflows/pages.yml"
 permissions:
   contents: read
@@ -19,23 +23,100 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Reconstruir PARKOPS v1.5.1 Web desde la misma base Android
+
+      - name: Reconstruir exactamente el núcleo de la APK PARKOPS v1.5.3
         shell: bash
         run: |
-          mkdir -p dist
-          cat source/real-app/index.html.gz.b64.* | base64 --decode | gzip -dc > dist/index.html
-          echo "ca465ce85dcdd084aee889972e931716366ae8402ac48e1f562a05e709d26407  dist/index.html" | sha256sum -c -
-          test "$(wc -c < dist/index.html)" -eq 64455
-          ! grep -q '3114980095' dist/index.html
-          ! grep -qi 'qr_nequi.jpg' dist/index.html
-          grep -q 'Registrar ingreso' dist/index.html
-          grep -q 'id="celular"' dist/index.html
-          grep -q 'Recibo por WhatsApp' dist/index.html
+          set -euo pipefail
+          rm -rf dist .web-build
+          mkdir -p dist .web-build
 
-          # Misma capa funcional de la APK v1.5.1: Bre-B integrado y contingencia offline.
-          cp web/parkops-v1.5.1.js dist/parkops-v1.5.1.js
+          cat source/real-app/index.html.gz.b64.* | base64 --decode | gzip -dc > .web-build/index.html
+          echo "ca465ce85dcdd084aee889972e931716366ae8402ac48e1f562a05e709d26407  .web-build/index.html" | sha256sum -c -
+          test "$(wc -c < .web-build/index.html)" -eq 64455
 
-          # Adaptadores exclusivos de navegador: compartir/descargar, licencia web y PWA.
+          cp web/parkops-v1.5.1.js .web-build/parkops-v1.5.1.js
+          echo "d4b513841ff88e6f958c431fffc72825777fda4db89e90c3f1cfff77e0950818  .web-build/parkops-v1.5.1.js" | sha256sum -c -
+          test "$(wc -c < .web-build/parkops-v1.5.1.js)" -eq 9114
+
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.web-build/index.html')
+          s=p.read_text(encoding='utf-8')
+          tag='<script src="parkops-v1.5.1.js"></script>'
+          if '</body>' in s:
+              s=s.replace('</body>',tag+'\n</body>',1)
+          else:
+              s+=tag
+          p.write_text(s,encoding='utf-8')
+          PY
+
+          # Este SHA y tamaño corresponden al assets/index.html extraído de la APK v1.5.3 aprobada.
+          echo "2ae5261f8ceae9af99a3cf4cec7cea2d1c1254cb8a3a2323c667a0335589627e  .web-build/index.html" | sha256sum -c -
+          test "$(wc -c < .web-build/index.html)" -eq 64497
+
+      - name: Auditoría funcional contra la APK v1.5.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          CORE=.web-build/index.html
+          EXT=.web-build/parkops-v1.5.1.js
+
+          # Navegación y operación principal.
+          grep -q 'Registrar ingreso' "$CORE"
+          grep -q 'Entrada y enviar recibo' "$CORE"
+          grep -q 'Entrada sin enviar recibo' "$CORE"
+          grep -q 'Liquidar salida' "$CORE"
+          grep -q 'En patio' "$CORE"
+          grep -q 'Cierre de caja' "$CORE"
+          grep -q 'Descargar CSV' "$CORE"
+          grep -q 'Enviar cierre por WhatsApp' "$CORE"
+
+          # Tipos de vehículo y servicios.
+          grep -q "id:'carro'" "$CORE"
+          grep -q "id:'moto'" "$CORE"
+          grep -q "id:'bicicleta'" "$CORE"
+          grep -q "id:'patineta'" "$CORE"
+          grep -q 'Conecta a recarga eléctrica' "$CORE"
+          grep -q 'Recarga ilimitada en la mensualidad' "$CORE"
+
+          # Configuración completa existente en APK.
+          grep -q 'tablaTarifas' "$CORE"
+          grep -q 'mediosPago' "$CORE"
+          grep -q 'Guardar reglas' "$CORE"
+          grep -q 'Guardar datos' "$CORE"
+          grep -q 'Guardar plantillas' "$CORE"
+          grep -q 'Descargar respaldo' "$CORE"
+          grep -q 'Restaurar respaldo' "$CORE"
+          grep -q 'Borrar todos los datos' "$CORE"
+          grep -q 'Registrar mensualidad' "$CORE"
+
+          # WhatsApp, recibos y datos locales.
+          grep -q 'wa.me' "$CORE"
+          grep -q "pqe_cfg" "$CORE"
+          grep -q "pqe_tarifas" "$CORE"
+          grep -q "pqe_clientes" "$CORE"
+          grep -q "pqe_ingresos" "$CORE"
+          grep -q "pqe_mens" "$CORE"
+
+          # Mejoras v1.5.3 aprobadas.
+          grep -q 'Bre-B' "$EXT"
+          grep -q 'Llave Bre-B' "$EXT"
+          grep -q 'probeInternet' "$EXT"
+          grep -q '● ONLINE' "$EXT"
+          grep -q '● OFFLINE' "$EXT"
+          grep -q "version:'1.5.3'" "$EXT"
+
+          # Privacidad heredada de la APK.
+          ! grep -q '3114980095' "$CORE"
+          ! grep -qi 'qr_nequi.jpg' "$CORE"
+
+      - name: Adaptar el mismo núcleo para navegadores sin modificar la APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .web-build/index.html dist/index.html
+          cp .web-build/parkops-v1.5.1.js dist/parkops-v1.5.1.js
           cp web/browser-bridge.js dist/browser-bridge.js
           cp web/parkops-web-platform.js dist/parkops-web-platform.js
           cp web/manifest.webmanifest dist/manifest.webmanifest
@@ -45,10 +126,10 @@ jobs:
           from pathlib import Path
           p=Path('dist/index.html')
           s=p.read_text(encoding='utf-8')
-          head='''<meta name="theme-color" content="#0f172a"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PARKOPS"><link rel="manifest" href="./manifest.webmanifest">'''
+          head='''<meta name="theme-color" content="#14171c"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="PARKOPS"><link rel="manifest" href="./manifest.webmanifest">'''
           if '</head>' in s:
               s=s.replace('</head>',head+'\n</head>',1)
-          scripts='''<script src="./browser-bridge.js"></script><script src="./parkops-v1.5.1.js"></script><script src="./parkops-web-platform.js"></script>'''
+          scripts='''<script src="./browser-bridge.js"></script><script src="./parkops-web-platform.js"></script>'''
           if '</body>' in s:
               s=s.replace('</body>',scripts+'\n</body>',1)
           else:
@@ -56,25 +137,21 @@ jobs:
           p.write_text(s,encoding='utf-8')
           PY
 
-          grep -q 'parkops-v1.5.1.js' dist/index.html
-          grep -q 'parkops-web-platform.js' dist/index.html
-          grep -q 'browser-bridge.js' dist/index.html
-          grep -q 'manifest.webmanifest' dist/index.html
-          grep -q 'Bre-B' dist/parkops-v1.5.1.js
-          grep -q 'CONTINGENCIA OFFLINE' dist/parkops-v1.5.1.js
-          ! grep -q 'parkops-breb-btn' dist/parkops-v1.5.1.js
-          grep -q 'Activación PARKOPS Web' dist/parkops-web-platform.js
-          grep -q 'WEB-' dist/parkops-web-platform.js
-          grep -q 'serviceWorker' dist/parkops-web-platform.js
+          printf '%s\n' '{"product":"PARKOPS","webVersion":"1.5.3-web","apkCore":"1.5.3","source":"exact-apk-core","apkIndexSha256":"2ae5261f8ceae9af99a3cf4cec7cea2d1c1254cb8a3a2323c667a0335589627e"}' > dist/version.json
 
-          # Herramientas administrativas web existentes permanecen separadas.
-          if [ -d web/admin ]; then mkdir -p dist/admin && cp -R web/admin/. dist/admin/; fi
-          if [ -d web/owner ]; then mkdir -p dist/owner && cp -R web/owner/. dist/owner/; fi
-          for f in web/app.js web/styles.css web/config.js; do [ -f "$f" ] && cp "$f" dist/; done
+          grep -q 'Activación PARKOPS Web' dist/parkops-web-platform.js
+          grep -q "VERSION='1.5.3-web'" dist/parkops-web-platform.js
+          grep -q 'AndroidDownload' dist/browser-bridge.js
+          grep -q 'parkops-web-v1.5.3-exact-apk-r1' dist/sw.js
+          grep -q 'manifest.webmanifest' dist/index.html
+          grep -q 'parkops-web-platform.js' dist/index.html
+          grep -q 'parkops-v1.5.1.js' dist/index.html
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+
   deploy:
     environment:
       name: github-pages
@@ -82,6 +159,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Publicar
+      - name: Publicar PARKOPS Web
         id: deployment
         uses: actions/deploy-pages@v4
