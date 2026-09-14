@@ -1,0 +1,9 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+const SUPABASE_URL='https://epadzsrfsvckyjugcvpd.supabase.co';
+const PUBLISHABLE_KEY='sb_publishable_PxFa4vMqovqCIDOwEsoiBQ_2q2jETc_';
+const sb=createClient(SUPABASE_URL,PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const msg=document.getElementById('msg');
+const setMsg=(t,ok=false)=>{msg.textContent=t;msg.className=ok?'ok':'err'};
+async function ensureSession(){let {data:{session}}=await sb.auth.getSession();if(session)return session;await new Promise(r=>setTimeout(r,600));({data:{session}}=await sb.auth.getSession());return session}
+document.getElementById('saveBtn').onclick=async()=>{const p=document.getElementById('password').value,c=document.getElementById('confirm').value;if(p.length<8)return setMsg('La contraseña debe tener mínimo 8 caracteres.');if(p!==c)return setMsg('Las contraseñas no coinciden.');const b=document.getElementById('saveBtn');b.disabled=true;try{const session=await ensureSession();if(!session)throw new Error('El enlace de activación no contiene una sesión válida o ya venció. Solicita una nueva invitación.');const {error}=await sb.auth.updateUser({password:p});if(error)throw error;setMsg('Cuenta activada correctamente. Redirigiendo a PARKSOLVEX Admin…',true);setTimeout(()=>location.href='./',1200)}catch(e){setMsg(e.message||'No fue posible activar la cuenta.');b.disabled=false}};
+ensureSession().then(s=>{if(s)setMsg('Invitación validada. Define tu nueva contraseña.',true);else setMsg('Abre esta página desde el enlace recibido en tu correo de invitación.')});
