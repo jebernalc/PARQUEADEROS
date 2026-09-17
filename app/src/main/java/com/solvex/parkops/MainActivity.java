@@ -58,18 +58,25 @@ public class MainActivity extends Activity {
                 if(filePathCallback!=null)filePathCallback.onReceiveValue(null);
                 filePathCallback=callback;
                 try{
-                    Intent intent=params!=null?params.createIntent():new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                    intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
-                    intent.addCategory(Intent.CATEGORY_OPENABLE);
-                    intent.setType("image/*");
-                    intent.putExtra(Intent.EXTRA_MIME_TYPES,new String[]{"image/png","image/jpeg","image/webp","image/gif"});
-                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE,false);
-                    startActivityForResult(Intent.createChooser(intent,"Seleccionar logo del cliente"),FILE_CHOOSER_REQUEST);
+                    Intent gallery=new Intent(Intent.ACTION_GET_CONTENT);
+                    gallery.addCategory(Intent.CATEGORY_OPENABLE);
+                    gallery.setType("image/*");
+                    gallery.putExtra(Intent.EXTRA_MIME_TYPES,new String[]{"image/png","image/jpeg","image/webp","image/gif"});
+                    gallery.putExtra(Intent.EXTRA_ALLOW_MULTIPLE,false);
+                    Intent chooser=Intent.createChooser(gallery,"Seleccionar logo del parqueadero");
+                    startActivityForResult(chooser,FILE_CHOOSER_REQUEST);
                     return true;
-                }catch(Exception e){
-                    filePathCallback=null;
-                    Toast.makeText(MainActivity.this,"No se pudo abrir la galería de imágenes.",Toast.LENGTH_LONG).show();
-                    return false;
+                }catch(Exception first){
+                    try{
+                        Intent fallback=new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                        fallback.addCategory(Intent.CATEGORY_OPENABLE);fallback.setType("image/*");
+                        startActivityForResult(Intent.createChooser(fallback,"Seleccionar logo del parqueadero"),FILE_CHOOSER_REQUEST);
+                        return true;
+                    }catch(Exception second){
+                        if(filePathCallback!=null)filePathCallback.onReceiveValue(null);filePathCallback=null;
+                        Toast.makeText(MainActivity.this,"No se encontró una galería o selector de imágenes disponible.",Toast.LENGTH_LONG).show();
+                        return true;
+                    }
                 }
             }
         });
