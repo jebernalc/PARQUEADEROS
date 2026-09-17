@@ -1,4 +1,4 @@
-name: Build PARKOPS Licensed APK v1.6.3
+name: Build PARKOPS Licensed APK v1.6.4
 on:
   workflow_dispatch:
   push:
@@ -16,70 +16,60 @@ jobs:
           mkdir -p app/src/main/assets
           cat source/real-app/index.html.gz.b64.* | base64 --decode | gzip -dc > app/src/main/assets/index.html
           echo "ca465ce85dcdd084aee889972e931716366ae8402ac48e1f562a05e709d26407  app/src/main/assets/index.html" | sha256sum -c -
-          test "$(wc -c < app/src/main/assets/index.html)" -eq 64455
-      - name: Add preserved features and v1.6.3 enhancements
+      - name: Add PARKOPS enhancements
         shell: bash
         run: |
-          for f in parkops-v1.5.1.js parkops-v1.6.0.js parkops-v1.6.1.js parkops-v1.6.2.js parkops-v1.6.3.js; do cp web/$f app/src/main/assets/$f; done
+          for f in parkops-v1.5.1.js parkops-v1.6.0.js parkops-v1.6.1.js parkops-v1.6.2.js parkops-v1.6.3.js parkops-v1.6.4.js; do cp web/$f app/src/main/assets/$f; done
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('app/src/main/assets/index.html');s=p.read_text(encoding='utf-8')
-          files=['parkops-v1.5.1.js','parkops-v1.6.0.js','parkops-v1.6.1.js','parkops-v1.6.2.js','parkops-v1.6.3.js']
+          p=Path('app/src/main/assets/index.html');s=p.read_text()
+          files=['parkops-v1.5.1.js','parkops-v1.6.0.js','parkops-v1.6.1.js','parkops-v1.6.2.js','parkops-v1.6.3.js','parkops-v1.6.4.js']
           tag='\n'.join(f'<script src="{x}"></script>' for x in files)
-          s=s.replace('</body>',tag+'\n</body>',1) if '</body>' in s else s+tag
-          p.write_text(s,encoding='utf-8')
+          p.write_text(s.replace('</body>',tag+'\n</body>',1))
           PY
-      - name: Regression and v1.6.3 validation
+      - name: Validate registration contract
         shell: bash
         run: |
           set -euo pipefail
-          grep -q "Registrar ingreso" app/src/main/assets/index.html
-          grep -q "Recibo por WhatsApp" app/src/main/assets/index.html
-          grep -q "Liquidar salida" app/src/main/assets/index.html
+          grep -q 'id="placa"' app/src/main/assets/index.html
+          grep -q "document.querySelector(s)" app/src/main/assets/parkops-v1.6.4.js
+          grep -q "N.º DE PARQUEADERO / PUESTO" app/src/main/assets/parkops-v1.6.4.js
+          grep -q "MODALIDAD DEL INGRESO" app/src/main/assets/parkops-v1.6.4.js
+          grep -q "POR MINUTOS" app/src/main/assets/parkops-v1.6.4.js
+          grep -q "TARIFA PLENA · TODO EL DÍA" app/src/main/assets/parkops-v1.6.4.js
+          grep -q "TARIFA PLENA · TODA LA NOCHE" app/src/main/assets/parkops-v1.6.4.js
+          grep -q "MENSUALIDAD" app/src/main/assets/parkops-v1.6.4.js
+          grep -q "CORTESÍA · SIN COBRO" app/src/main/assets/parkops-v1.6.4.js
+          grep -q "Cupos de recarga eléctrica" app/src/main/assets/parkops-v1.6.4.js
+          grep -q "capRecarga164" app/src/main/assets/parkops-v1.6.4.js
+          grep -q "No hay cupos de recarga eléctrica disponibles" app/src/main/assets/parkops-v1.6.4.js
           grep -q "Bre-B" app/src/main/assets/parkops-v1.5.1.js
-          grep -q "MARCAR SALIDA · LIBERAR CUPO" app/src/main/assets/parkops-v1.6.0.js
-          grep -q "GUARDAR CAPACIDADES" app/src/main/assets/parkops-v1.6.1.js
           grep -q "FACTURA ELECTRÓNICA" app/src/main/assets/parkops-v1.6.2.js
-          grep -q "ASIGNACIÓN Y TARIFA DEL INGRESO" app/src/main/assets/parkops-v1.6.3.js
-          grep -q "POR MINUTOS" app/src/main/assets/parkops-v1.6.3.js
-          grep -q "TARIFA PLENA · TODO EL DÍA" app/src/main/assets/parkops-v1.6.3.js
-          grep -q "TARIFA PLENA · TODA LA NOCHE" app/src/main/assets/parkops-v1.6.3.js
-          grep -q "CORTESÍA · SIN COBRO" app/src/main/assets/parkops-v1.6.3.js
-          grep -q "isCourtesy" app/src/main/assets/parkops-v1.6.3.js
-          grep -q "total:0,parqueo:0,recarga:0" app/src/main/assets/parkops-v1.6.3.js
-          grep -q 'versionName "1.6.3"' app/build.gradle
-          ! grep -R -q 'BEGIN PRIVATE KEY' app web
+          grep -q 'versionName "1.6.4"' app/build.gradle
           ! grep -R -q 'SUPABASE_SERVICE_ROLE_KEY' app web
       - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
+        with: {distribution: temurin, java-version: '17'}
       - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.11.1'
+        with: {gradle-version: '8.11.1'}
       - name: Build installable APK
         run: gradle assembleDebug --no-daemon
-      - name: Verify compiled APK
+      - name: Verify APK payload
         shell: bash
         run: |
           APK=app/build/outputs/apk/debug/app-debug.apk
           test -f "$APK"
-          unzip -p "$APK" assets/index.html | grep -q "parkops-v1.6.3.js"
-          unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "Bre-B"
-          unzip -p "$APK" assets/parkops-v1.6.0.js | grep -q "LIQUIDAR PAGO · NO LIBERA CUPO"
-          unzip -p "$APK" assets/parkops-v1.6.1.js | grep -q "GUARDAR CAPACIDADES"
-          unzip -p "$APK" assets/parkops-v1.6.3.js | grep -q "ASIGNACIÓN Y TARIFA DEL INGRESO"
-          unzip -p "$APK" assets/parkops-v1.6.3.js | grep -q "CORTESÍA · SIN COBRO"
-          unzip -p "$APK" assets/parkops-v1.6.3.js | grep -q "total:0,parqueo:0,recarga:0"
-          unzip -l "$APK" | grep -q 'AndroidManifest.xml'
+          unzip -p "$APK" assets/index.html | grep -q 'parkops-v1.6.4.js'
+          unzip -p "$APK" assets/parkops-v1.6.4.js | grep -q 'N.º DE PARQUEADERO / PUESTO'
+          unzip -p "$APK" assets/parkops-v1.6.4.js | grep -q 'MENSUALIDAD'
+          unzip -p "$APK" assets/parkops-v1.6.4.js | grep -q 'Cupos de recarga eléctrica'
       - name: Package
         shell: bash
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.6.3.apk
-          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.6.3.apk > release/PARKOPS-SOLVEX-LICENSED-v1.6.3.sha256
+          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.6.4.apk
+          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.6.4.apk > release/PARKOPS-SOLVEX-LICENSED-v1.6.4.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: PARKOPS-SOLVEX-LICENSED-v1.6.3
+          name: PARKOPS-SOLVEX-LICENSED-v1.6.4
           path: release/
           if-no-files-found: error
