@@ -19,15 +19,15 @@ jobs:
       - name: Add PARKOPS v1.6.4 enhancements
         shell: bash
         run: |
-          for f in parkops-v1.5.1.js parkops-v1.6.0.js parkops-v1.6.1.js parkops-v1.6.2.js parkops-v1.6.3.js parkops-v1.6.4.js parkops-v1.6.4-pro.js; do cp web/$f app/src/main/assets/$f; done
+          for f in parkops-v1.5.1.js parkops-v1.6.0.js parkops-v1.6.1.js parkops-v1.6.2.js parkops-v1.6.3.js parkops-v1.6.4.js parkops-v1.6.4-pro.js parkops-v1.6.4-brand-final.js; do cp web/$f app/src/main/assets/$f; done
           python3 - <<'PY'
           from pathlib import Path
           p=Path('app/src/main/assets/index.html');s=p.read_text()
-          files=['parkops-v1.5.1.js','parkops-v1.6.0.js','parkops-v1.6.1.js','parkops-v1.6.2.js','parkops-v1.6.3.js','parkops-v1.6.4.js','parkops-v1.6.4-pro.js']
+          files=['parkops-v1.5.1.js','parkops-v1.6.0.js','parkops-v1.6.1.js','parkops-v1.6.2.js','parkops-v1.6.3.js','parkops-v1.6.4.js','parkops-v1.6.4-pro.js','parkops-v1.6.4-brand-final.js']
           tag='\n'.join(f'<script src="{x}"></script>' for x in files)
           p.write_text(s.replace('</body>',tag+'\n</body>',1))
           PY
-      - name: Validate final v1.6.4 features and native gallery chooser
+      - name: Validate final v1.6.4 features, gallery and client branding
         shell: bash
         run: |
           set -euo pipefail
@@ -36,17 +36,16 @@ jobs:
           grep -q "MODALIDAD DEL INGRESO" app/src/main/assets/parkops-v1.6.4.js
           grep -q "MENSUALIDAD" app/src/main/assets/parkops-v1.6.4.js
           grep -q "Cupos de recarga eléctrica" app/src/main/assets/parkops-v1.6.4.js
-          grep -q "let scheduled=false" app/src/main/assets/parkops-v1.6.4.js
           grep -q "SELECCIÓN DE LIQUIDACIÓN" app/src/main/assets/parkops-v1.6.4-pro.js
           for x in '1 HORA' '2 HORAS' '3 HORAS' '4 HORAS' 'TODO EL DÍA' 'MENSUALIDAD'; do grep -q "$x" app/src/main/assets/parkops-v1.6.4-pro.js; done
-          grep -q "Logo personalizado del cliente" app/src/main/assets/parkops-v1.6.4-pro.js
           grep -q 'type="file"' app/src/main/assets/parkops-v1.6.4-pro.js
-          grep -q "GUARDAR TARIFAS DE SALIDA" app/src/main/assets/parkops-v1.6.4-pro.js
           grep -q "onShowFileChooser" app/src/main/java/com/solvex/parkops/MainActivity.java
           grep -q "ACTION_OPEN_DOCUMENT" app/src/main/java/com/solvex/parkops/MainActivity.java
-          grep -q "image/png" app/src/main/java/com/solvex/parkops/MainActivity.java
-          grep -q "Seleccionar logo del cliente" app/src/main/java/com/solvex/parkops/MainActivity.java
-          grep -q "onActivityResult" app/src/main/java/com/solvex/parkops/MainActivity.java
+          grep -q "parkops-header-client-logo" app/src/main/assets/parkops-v1.6.4-brand-final.js
+          grep -q "old.style.display" app/src/main/assets/parkops-v1.6.4-brand-final.js
+          grep -q "aNombre" app/src/main/assets/parkops-v1.6.4-brand-final.js
+          grep -q "Logo del parqueadero" app/src/main/assets/parkops-v1.6.4-brand-final.js
+          grep -q "reemplaza el ícono amarillo" app/src/main/assets/parkops-v1.6.4-brand-final.js
           grep -q "Bre-B" app/src/main/assets/parkops-v1.5.1.js
           grep -q 'versionName "1.6.4"' app/build.gradle
           ! grep -R -q 'SUPABASE_SERVICE_ROLE_KEY' app web
@@ -61,11 +60,10 @@ jobs:
         run: |
           APK=app/build/outputs/apk/debug/app-debug.apk
           test -f "$APK"
-          unzip -p "$APK" assets/index.html | grep -q 'parkops-v1.6.4-pro.js'
-          unzip -p "$APK" assets/parkops-v1.6.4.js | grep -q 'let scheduled=false'
+          unzip -p "$APK" assets/index.html | grep -q 'parkops-v1.6.4-brand-final.js'
           unzip -p "$APK" assets/parkops-v1.6.4-pro.js | grep -q 'SELECCIÓN DE LIQUIDACIÓN'
-          unzip -p "$APK" assets/parkops-v1.6.4-pro.js | grep -q 'Logo personalizado del cliente'
-          unzip -p "$APK" assets/parkops-v1.6.4-pro.js | grep -q 'GUARDAR TARIFAS DE SALIDA'
+          unzip -p "$APK" assets/parkops-v1.6.4-brand-final.js | grep -q 'parkops-header-client-logo'
+          unzip -p "$APK" assets/parkops-v1.6.4-brand-final.js | grep -q 'reemplaza el ícono amarillo'
           unzip -l "$APK" | grep -q 'classes.dex'
       - name: Package
         shell: bash
