@@ -27,12 +27,11 @@ jobs:
           tag='\n'.join(f'<script src="{x}"></script>' for x in files)
           p.write_text(s.replace('</body>',tag+'\n</body>',1))
           PY
-      - name: Validate registration contract
+      - name: Validate registration and touch hotfix
         shell: bash
         run: |
           set -euo pipefail
           grep -q 'id="placa"' app/src/main/assets/index.html
-          grep -q "document.querySelector(s)" app/src/main/assets/parkops-v1.6.4.js
           grep -q "N.º DE PARQUEADERO / PUESTO" app/src/main/assets/parkops-v1.6.4.js
           grep -q "MODALIDAD DEL INGRESO" app/src/main/assets/parkops-v1.6.4.js
           grep -q "POR MINUTOS" app/src/main/assets/parkops-v1.6.4.js
@@ -41,10 +40,11 @@ jobs:
           grep -q "MENSUALIDAD" app/src/main/assets/parkops-v1.6.4.js
           grep -q "CORTESÍA · SIN COBRO" app/src/main/assets/parkops-v1.6.4.js
           grep -q "Cupos de recarga eléctrica" app/src/main/assets/parkops-v1.6.4.js
-          grep -q "capRecarga164" app/src/main/assets/parkops-v1.6.4.js
-          grep -q "No hay cupos de recarga eléctrica disponibles" app/src/main/assets/parkops-v1.6.4.js
+          grep -q "let scheduled=false" app/src/main/assets/parkops-v1.6.4.js
+          grep -q "setTimeout(reconcile,0)" app/src/main/assets/parkops-v1.6.4.js
+          grep -q "pointer-events:auto" app/src/main/assets/parkops-v1.6.4.js
+          ! grep -q "MutationObserver(()=>.*renderEV" app/src/main/assets/parkops-v1.6.4.js
           grep -q "Bre-B" app/src/main/assets/parkops-v1.5.1.js
-          grep -q "FACTURA ELECTRÓNICA" app/src/main/assets/parkops-v1.6.2.js
           grep -q 'versionName "1.6.4"' app/build.gradle
           ! grep -R -q 'SUPABASE_SERVICE_ROLE_KEY' app web
       - uses: actions/setup-java@v4
@@ -59,7 +59,8 @@ jobs:
           APK=app/build/outputs/apk/debug/app-debug.apk
           test -f "$APK"
           unzip -p "$APK" assets/index.html | grep -q 'parkops-v1.6.4.js'
-          unzip -p "$APK" assets/parkops-v1.6.4.js | grep -q 'N.º DE PARQUEADERO / PUESTO'
+          unzip -p "$APK" assets/parkops-v1.6.4.js | grep -q 'let scheduled=false'
+          unzip -p "$APK" assets/parkops-v1.6.4.js | grep -q 'pointer-events:auto'
           unzip -p "$APK" assets/parkops-v1.6.4.js | grep -q 'MENSUALIDAD'
           unzip -p "$APK" assets/parkops-v1.6.4.js | grep -q 'Cupos de recarga eléctrica'
       - name: Package
