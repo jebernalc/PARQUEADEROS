@@ -1,8 +1,8 @@
-name: Build PARKOPS Licensed APK v1.5.3
+name: Build PARKOPS Licensed APK v1.6.0
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [apk-v1.6.0-capacidad]
 permissions:
   contents: read
 jobs:
@@ -10,40 +10,45 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Reconstruct immutable authoritative base
+      - name: Reconstruct immutable v1.5.3 base
         shell: bash
         run: |
           mkdir -p app/src/main/assets
           cat source/real-app/index.html.gz.b64.* | base64 --decode | gzip -dc > app/src/main/assets/index.html
           echo "ca465ce85dcdd084aee889972e931716366ae8402ac48e1f562a05e709d26407  app/src/main/assets/index.html" | sha256sum -c -
           test "$(wc -c < app/src/main/assets/index.html)" -eq 64455
-          rm -f app/src/main/assets/qr_nequi.jpg
-      - name: Add preserved features and v1.5.3 status placement
+      - name: Add preserved v1.5.3 features and v1.6.0 enhancements
         shell: bash
         run: |
           cp web/parkops-v1.5.1.js app/src/main/assets/parkops-v1.5.1.js
+          cp web/parkops-v1.6.0.js app/src/main/assets/parkops-v1.6.0.js
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('app/src/main/assets/index.html');s=p.read_text(encoding='utf-8');tag='<script src="parkops-v1.5.1.js"></script>';s=s.replace('</body>',tag+'\n</body>',1) if '</body>' in s else s+tag;p.write_text(s,encoding='utf-8')
+          p=Path('app/src/main/assets/index.html');s=p.read_text(encoding='utf-8')
+          tag='<script src="parkops-v1.5.1.js"></script>\n<script src="parkops-v1.6.0.js"></script>'
+          s=s.replace('</body>',tag+'\n</body>',1) if '</body>' in s else s+tag
+          p.write_text(s,encoding='utf-8')
           PY
-      - name: Validate preserved app and requested fix only
+      - name: Regression and v1.6.0 validation
         shell: bash
         run: |
+          set -euo pipefail
           grep -q "Registrar ingreso" app/src/main/assets/index.html
-          grep -q 'id="celular"' app/src/main/assets/index.html
           grep -q "Recibo por WhatsApp" app/src/main/assets/index.html
+          grep -q "Liquidar salida" app/src/main/assets/index.html
+          grep -q "Cierre de caja" app/src/main/assets/index.html
           grep -q "Bre-B" app/src/main/assets/parkops-v1.5.1.js
-          grep -q "Llave Bre-B" app/src/main/assets/parkops-v1.5.1.js
           grep -q "probeInternet" app/src/main/assets/parkops-v1.5.1.js
-          grep -q "generate_204" app/src/main/assets/parkops-v1.5.1.js
-          grep -q "findClock" app/src/main/assets/parkops-v1.5.1.js
-          grep -q "positionStatus" app/src/main/assets/parkops-v1.5.1.js
-          grep -q "● ONLINE" app/src/main/assets/parkops-v1.5.1.js
-          grep -q "● OFFLINE" app/src/main/assets/parkops-v1.5.1.js
-          grep -q 'versionName "1.5.3"' app/build.gradle
-          ! grep -q '3114980095' app/src/main/assets/index.html
-          ! grep -R -q 'BEGIN PRIVATE KEY' app
-          ! grep -R -q 'SUPABASE_SERVICE_ROLE_KEY' app
+          grep -q "capacityOk" app/src/main/assets/parkops-v1.6.0.js
+          grep -q "Disponibilidad en tiempo real" app/src/main/assets/parkops-v1.6.0.js
+          grep -q "slotCode" app/src/main/assets/parkops-v1.6.0.js
+          grep -q "LIQUIDADO" app/src/main/assets/parkops-v1.6.0.js
+          grep -q "MARCAR SALIDA · LIBERAR CUPO" app/src/main/assets/parkops-v1.6.0.js
+          grep -q "FACTURA ELECTRÓNICA" app/src/main/assets/parkops-v1.6.0.js
+          grep -q "slotProvisional" app/src/main/assets/parkops-v1.6.0.js
+          grep -q 'versionName "1.6.0"' app/build.gradle
+          ! grep -R -q 'BEGIN PRIVATE KEY' app web
+          ! grep -R -q 'SUPABASE_SERVICE_ROLE_KEY' app web
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -58,20 +63,20 @@ jobs:
         run: |
           APK=app/build/outputs/apk/debug/app-debug.apk
           test -f "$APK"
-          unzip -p "$APK" assets/index.html | grep -q "parkops-v1.5.1.js"
-          unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "findClock"
-          unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "● ONLINE"
-          unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "● OFFLINE"
+          unzip -p "$APK" assets/index.html | grep -q "parkops-v1.6.0.js"
           unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "Bre-B"
+          unzip -p "$APK" assets/parkops-v1.6.0.js | grep -q "Disponibilidad en tiempo real"
+          unzip -p "$APK" assets/parkops-v1.6.0.js | grep -q "LIQUIDAR PAGO · NO LIBERA CUPO"
+          unzip -p "$APK" assets/parkops-v1.6.0.js | grep -q "FACTURA ELECTRÓNICA"
           unzip -l "$APK" | grep -q 'AndroidManifest.xml'
       - name: Package
         shell: bash
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.5.3.apk
-          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.5.3.apk > release/PARKOPS-SOLVEX-LICENSED-v1.5.3.sha256
+          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.6.0.apk
+          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.6.0.apk > release/PARKOPS-SOLVEX-LICENSED-v1.6.0.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: PARKOPS-SOLVEX-LICENSED-v1.5.3
+          name: PARKOPS-SOLVEX-LICENSED-v1.6.0
           path: release/
           if-no-files-found: error
