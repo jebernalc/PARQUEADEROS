@@ -1,23 +1,15 @@
 plugins {
     id 'com.android.application'
 }
-
 android {
     namespace 'com.solvex.parkops'
     compileSdk 36
-
     defaultConfig {
         applicationId "com.solvex.parkops"
         minSdk 29
         targetSdk 36
-        versionCode 13
-        versionName "1.6.3"
+        versionCode 14
+        versionName "1.6.4"
     }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
+    buildTypes { release { minifyEnabled false; proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro' } }
 }
