@@ -27,7 +27,7 @@ jobs:
           tag='\n'.join(f'<script src="{x}"></script>' for x in files)
           p.write_text(s.replace('</body>',tag+'\n</body>',1))
           PY
-      - name: Validate v1.6.4 professional features
+      - name: Validate final v1.6.4 features and native gallery chooser
         shell: bash
         run: |
           set -euo pipefail
@@ -38,15 +38,15 @@ jobs:
           grep -q "Cupos de recarga eléctrica" app/src/main/assets/parkops-v1.6.4.js
           grep -q "let scheduled=false" app/src/main/assets/parkops-v1.6.4.js
           grep -q "SELECCIÓN DE LIQUIDACIÓN" app/src/main/assets/parkops-v1.6.4-pro.js
-          grep -q "1 HORA" app/src/main/assets/parkops-v1.6.4-pro.js
-          grep -q "2 HORAS" app/src/main/assets/parkops-v1.6.4-pro.js
-          grep -q "3 HORAS" app/src/main/assets/parkops-v1.6.4-pro.js
-          grep -q "4 HORAS" app/src/main/assets/parkops-v1.6.4-pro.js
-          grep -q "TODO EL DÍA" app/src/main/assets/parkops-v1.6.4-pro.js
-          grep -q "MENSUALIDAD" app/src/main/assets/parkops-v1.6.4-pro.js
+          for x in '1 HORA' '2 HORAS' '3 HORAS' '4 HORAS' 'TODO EL DÍA' 'MENSUALIDAD'; do grep -q "$x" app/src/main/assets/parkops-v1.6.4-pro.js; done
           grep -q "Logo personalizado del cliente" app/src/main/assets/parkops-v1.6.4-pro.js
           grep -q 'type="file"' app/src/main/assets/parkops-v1.6.4-pro.js
           grep -q "GUARDAR TARIFAS DE SALIDA" app/src/main/assets/parkops-v1.6.4-pro.js
+          grep -q "onShowFileChooser" app/src/main/java/com/solvex/parkops/MainActivity.java
+          grep -q "ACTION_OPEN_DOCUMENT" app/src/main/java/com/solvex/parkops/MainActivity.java
+          grep -q "image/png" app/src/main/java/com/solvex/parkops/MainActivity.java
+          grep -q "Seleccionar logo del cliente" app/src/main/java/com/solvex/parkops/MainActivity.java
+          grep -q "onActivityResult" app/src/main/java/com/solvex/parkops/MainActivity.java
           grep -q "Bre-B" app/src/main/assets/parkops-v1.5.1.js
           grep -q 'versionName "1.6.4"' app/build.gradle
           ! grep -R -q 'SUPABASE_SERVICE_ROLE_KEY' app web
@@ -66,6 +66,7 @@ jobs:
           unzip -p "$APK" assets/parkops-v1.6.4-pro.js | grep -q 'SELECCIÓN DE LIQUIDACIÓN'
           unzip -p "$APK" assets/parkops-v1.6.4-pro.js | grep -q 'Logo personalizado del cliente'
           unzip -p "$APK" assets/parkops-v1.6.4-pro.js | grep -q 'GUARDAR TARIFAS DE SALIDA'
+          unzip -l "$APK" | grep -q 'classes.dex'
       - name: Package
         shell: bash
         run: |
