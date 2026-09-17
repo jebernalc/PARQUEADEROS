@@ -16,6 +16,7 @@ import android.provider.Settings;
 import android.view.View;
 import android.view.WindowInsets;
 import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -39,8 +40,10 @@ import java.util.concurrent.Executors;
 public class MainActivity extends Activity {
     private static final String SUPABASE_URL="https://epadzsrfsvckyjugcvpd.supabase.co";
     private static final String PUBLISHABLE_KEY="sb_publishable_PxFa4vMqovqCIDOwEsoiBQ_2q2jETc_";
+    private static final int FILE_CHOOSER_REQUEST=1640;
     private WebView webView;
     private AndroidBridge bridge;
+    private ValueCallback<Uri[]> filePathCallback;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,11 +52,44 @@ public class MainActivity extends Activity {
         webView=new WebView(this);webView.setBackgroundColor(Color.parseColor("#14171C"));webView.setOverScrollMode(View.OVER_SCROLL_NEVER);setContentView(webView);
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.R){webView.setOnApplyWindowInsetsListener((v,insets)->{android.graphics.Insets bars=insets.getInsets(WindowInsets.Type.systemBars());v.setPadding(bars.left,bars.top,bars.right,bars.bottom);return insets;});}else webView.setFitsSystemWindows(true);
         WebSettings settings=webView.getSettings();settings.setJavaScriptEnabled(true);settings.setDomStorageEnabled(true);settings.setDatabaseEnabled(true);settings.setAllowFileAccess(true);settings.setAllowContentAccess(true);settings.setBuiltInZoomControls(false);settings.setDisplayZoomControls(false);settings.setSupportZoom(false);settings.setMediaPlaybackRequiresUserGesture(true);settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
-        bridge=new AndroidBridge(this);webView.addJavascriptInterface(bridge,"AndroidBridge");webView.setWebChromeClient(new WebChromeClient());webView.setWebViewClient(new WebViewClient(){
+        bridge=new AndroidBridge(this);webView.addJavascriptInterface(bridge,"AndroidBridge");
+        webView.setWebChromeClient(new WebChromeClient(){
+            @Override public boolean onShowFileChooser(WebView view,ValueCallback<Uri[]> callback,FileChooserParams params){
+                if(filePathCallback!=null)filePathCallback.onReceiveValue(null);
+                filePathCallback=callback;
+                try{
+                    Intent intent=params!=null?params.createIntent():new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    intent.setType("image/*");
+                    intent.putExtra(Intent.EXTRA_MIME_TYPES,new String[]{"image/png","image/jpeg","image/webp","image/gif"});
+                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE,false);
+                    startActivityForResult(Intent.createChooser(intent,"Seleccionar logo del cliente"),FILE_CHOOSER_REQUEST);
+                    return true;
+                }catch(Exception e){
+                    filePathCallback=null;
+                    Toast.makeText(MainActivity.this,"No se pudo abrir la galería de imágenes.",Toast.LENGTH_LONG).show();
+                    return false;
+                }
+            }
+        });
+        webView.setWebViewClient(new WebViewClient(){
             @Override public boolean shouldOverrideUrlLoading(WebView view,WebResourceRequest request){Uri uri=request.getUrl();String scheme=uri.getScheme()==null?"":uri.getScheme().toLowerCase();String host=uri.getHost()==null?"":uri.getHost().toLowerCase();if(scheme.equals("file"))return false;if(scheme.equals("http")||scheme.equals("https")||scheme.equals("mailto")||scheme.equals("tel")||scheme.equals("sms")||scheme.equals("whatsapp")){openExternal(uri,host);return true;}return false;}
             @SuppressWarnings("deprecation") @Override public boolean shouldOverrideUrlLoading(WebView view,String url){Uri uri=Uri.parse(url);if("file".equalsIgnoreCase(uri.getScheme()))return false;openExternal(uri,uri.getHost()==null?"":uri.getHost());return true;}
         });
         if(bridge.hasValidLicense())loadLicensedApp();else loadActivationScreen();
+    }
+
+    @Override protected void onActivityResult(int requestCode,int resultCode,Intent data){
+        super.onActivityResult(requestCode,resultCode,data);
+        if(requestCode!=FILE_CHOOSER_REQUEST)return;
+        ValueCallback<Uri[]> callback=filePathCallback;filePathCallback=null;if(callback==null)return;
+        Uri[] result=null;
+        if(resultCode==RESULT_OK&&data!=null){
+            if(data.getClipData()!=null&&data.getClipData().getItemCount()>0){result=new Uri[]{data.getClipData().getItemAt(0).getUri()};}
+            else if(data.getData()!=null){result=new Uri[]{data.getData()};}
+        }
+        callback.onReceiveValue(result);
     }
 
     private void loadLicensedApp(){webView.loadUrl("file:///android_asset/index.html");}
