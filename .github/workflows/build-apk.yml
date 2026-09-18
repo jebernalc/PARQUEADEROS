@@ -2,7 +2,7 @@ name: Build PARKOPS Licensed APK v1.6.6 AUTHORITATIVE
 on:
   workflow_dispatch:
   push:
-    branches: [apk-v1.6.6-from-authoritative-v1.6.4]
+    branches: [apk-v1.6.5-from-authoritative-v1.6.4]
 permissions:
   contents: read
 jobs:
