@@ -1,6 +1,7 @@
 package com.solvex.parkops.owner;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
@@ -140,8 +141,23 @@ public class MainActivity extends Activity {
 
     private void renderClients(LinearLayout list,String query){
         list.removeAllViews();String q=query==null?"":query.trim().toLowerCase(Locale.ROOT);int shown=0;
-        for(int oi=0;oi<organizations.size();oi++){JSONObject o=organizations.get(oi);String id=o.optString("id"),name=o.optString("trade_name",o.optString("legal_name","Cliente")),phone=o.optString("phone","");List<JSONObject> own=new ArrayList<>();for(JSONObject l:licenses)if(id.equals(l.optString("organization_id")))own.add(l);StringBuilder hay=new StringBuilder(name).append(' ').append(phone);for(JSONObject l:own)hay.append(' ').append(l.optString("device_id")).append(' ').append(l.optString("license_id")).append(' ').append(l.optString("license_key"));if(!q.isEmpty()&&!hay.toString().toLowerCase(Locale.ROOT).contains(q))continue;shown++;LinearLayout c=card();c.addView(txt(name,18));TextView ph=txt("Celular: "+(phone.isEmpty()?"—":phone)+"   ·   Licencias: "+own.size(),13);ph.setTextColor(MUTED);c.addView(ph);int pos=oi;Button newLic=btn("NUEVA LICENCIA PARA ESTE CLIENTE");c.addView(newLic);newLic.setOnClickListener(v->showGenerator(pos));for(JSONObject l:own){LinearLayout lc=card();String lid=l.optString("license_id"),dev=l.optString("device_id"),plan=l.optString("plan_code"),key=l.optString("license_key"),rev=l.optString("revoked_at","");lc.addView(txt(lid+" · "+plan+(rev.isEmpty()?"":" · CANCELADA"),14));TextView d=txt("Dispositivo: "+dev+" · Vence: "+l.optString("expires_at","—"),12);d.setTextColor(MUTED);lc.addView(d);Button resend=btn("REENVIAR ESTA LICENCIA POR WHATSAPP"),copy=btn("COPIAR LICENCIA"),revoke=btn("CANCELAR LICENCIA");lc.addView(resend);lc.addView(copy);lc.addView(revoke);resend.setEnabled(!key.isEmpty()&&!phone.isEmpty()&&rev.isEmpty());copy.setEnabled(!key.isEmpty());revoke.setEnabled(rev.isEmpty());resend.setOnClickListener(v->sendWhatsApp(phone,name,lid,key));copy.setOnClickListener(v->copyLicense(key));revoke.setOnClickListener(v->io.execute(()->{try{JSONObject r=master(new JSONObject().put("action","revoke_license").put("license_id",lid));if(r.has("error"))throw new Exception(r.optString("error"));toast("Licencia cancelada");loadDashboard();}catch(Exception e){toast("No se pudo cancelar: "+e.getMessage());}}));c.addView(lc);}list.addView(c);}
+        for(int oi=0;oi<organizations.size();oi++){JSONObject o=organizations.get(oi);String id=o.optString("id"),name=o.optString("trade_name",o.optString("legal_name","Cliente")),phone=o.optString("phone","");List<JSONObject> own=new ArrayList<>();for(JSONObject l:licenses)if(id.equals(l.optString("organization_id")))own.add(l);StringBuilder hay=new StringBuilder(name).append(' ').append(phone);for(JSONObject l:own)hay.append(' ').append(l.optString("device_id")).append(' ').append(l.optString("license_id")).append(' ').append(l.optString("license_key"));if(!q.isEmpty()&&!hay.toString().toLowerCase(Locale.ROOT).contains(q))continue;shown++;LinearLayout c=card();c.addView(txt(name,18));TextView ph=txt("Celular: "+(phone.isEmpty()?"—":phone)+"   ·   Licencias: "+own.size(),13);ph.setTextColor(MUTED);c.addView(ph);int pos=oi;Button newLic=btn("NUEVA LICENCIA PARA ESTE CLIENTE");c.addView(newLic);newLic.setOnClickListener(v->showGenerator(pos));for(JSONObject l:own){LinearLayout lc=card();String lid=l.optString("license_id"),dev=l.optString("device_id"),plan=l.optString("plan_code"),key=l.optString("license_key"),rev=l.optString("revoked_at","");lc.addView(txt(lid+" · "+plan+(rev.isEmpty()?"":" · CANCELADA"),14));TextView d=txt("Dispositivo: "+dev+" · Vence: "+l.optString("expires_at","—"),12);d.setTextColor(MUTED);lc.addView(d);Button resend=btn("REENVIAR ESTA LICENCIA POR WHATSAPP"),copy=btn("COPIAR LICENCIA"),revoke=btn("CANCELAR LICENCIA"),delete=btn("ELIMINAR LICENCIA DEFINITIVAMENTE");lc.addView(resend);lc.addView(copy);lc.addView(revoke);lc.addView(delete);resend.setEnabled(!key.isEmpty()&&!phone.isEmpty()&&rev.isEmpty());copy.setEnabled(!key.isEmpty());revoke.setEnabled(rev.isEmpty());resend.setOnClickListener(v->sendWhatsApp(phone,name,lid,key));copy.setOnClickListener(v->copyLicense(key));revoke.setOnClickListener(v->io.execute(()->{try{JSONObject r=master(new JSONObject().put("action","revoke_license").put("license_id",lid));if(r.has("error"))throw new Exception(r.optString("error"));toast("Licencia cancelada");loadDashboard();}catch(Exception e){toast("No se pudo cancelar: "+e.getMessage());}}));delete.setOnClickListener(v->confirmDeleteLicense(lid,name,dev));c.addView(lc);}list.addView(c);}
         if(shown==0){TextView n=txt("No se encontraron clientes o licencias.",15);n.setTextColor(MUTED);list.addView(n);}
+    }
+
+    private void confirmDeleteLicense(String licenseId,String customerName,String deviceId){
+        new AlertDialog.Builder(this)
+            .setTitle("ELIMINAR LICENCIA")
+            .setMessage("Esta acción eliminará definitivamente la licencia de "+customerName+" y liberará sus registros asociados.\n\nLicencia: "+licenseId+"\nDispositivo: "+deviceId+"\n\nNo se puede deshacer.")
+            .setNegativeButton("CANCELAR",null)
+            .setPositiveButton("ELIMINAR",(dialog,which)->io.execute(()->{
+                try{
+                    JSONObject r=master(new JSONObject().put("action","delete_license").put("license_id",licenseId));
+                    if(r.has("error"))throw new Exception(r.optString("error"));
+                    toast("Licencia eliminada definitivamente");
+                    loadDashboard();
+                }catch(Exception e){toast("No se pudo eliminar: "+e.getMessage());}
+            })).show();
     }
 
     private void copyLicense(String key){if(key==null||key.isEmpty())return;ClipboardManager cm=(ClipboardManager)getSystemService(CLIPBOARD_SERVICE);cm.setPrimaryClip(ClipData.newPlainText("Licencia PARKOPS",key));toast("Licencia copiada");}
