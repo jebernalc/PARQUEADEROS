@@ -48,7 +48,7 @@ jobs:
           grep -q "LOGO PERSONALIZADO DEL CLIENTE · ABRIR GALERÍA" app/src/main/assets/parkops-v1.6.4-brand-final.js
           grep -q "Abriendo galería" app/src/main/assets/parkops-v1.6.4-brand-final.js
           grep -q "Bre-B" app/src/main/assets/parkops-v1.5.1.js
-          grep -q 'versionName "1.6.6"' app/build.gradle
+          grep -q 'versionName "1.6.7"' app/build.gradle
           grep -q 'GUARDA / DEJA CASCO' app/src/main/assets/parkops-v1.6.4.js
           grep -q 'USO DE BAÑO' app/src/main/assets/parkops-v1.6.4.js
           grep -q 'OBSERVACIONES' app/src/main/assets/parkops-v1.6.4.js
