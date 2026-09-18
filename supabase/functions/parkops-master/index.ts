@@ -79,10 +79,48 @@ Deno.serve(async (req) => {
       return json({ ok: true, email, user_id: user.id });
     }
 
-    const { data: ownerRow } = await admin.from('platform_owners').select('user_id').eq('user_id', user.id).eq('active', true).maybeSingle();
+    const { data: ownerRow } = await admin.from('platform_owners').select('user_id,role').eq('user_id', user.id).eq('active', true).maybeSingle();
     if (!ownerRow) return json({ error: 'Forbidden' }, 403);
 
-    if (action === 'owner_bootstrap') return json({ email: user.email, user_id: user.id });
+    if (action === 'owner_bootstrap') return json({ email: user.email, user_id: user.id, role: ownerRow.role || 'admin' });
+
+    if (action === 'list_license_admins') {
+      if (ownerRow.role !== 'owner') return json({ error: 'Solo el propietario puede administrar usuarios' }, 403);
+      const { data: rows, error } = await admin.from('platform_owners').select('user_id,active,role,created_at').order('created_at', { ascending: true });
+      if (error) throw error;
+      const users = await Promise.all((rows || []).map(async (row: any) => {
+        const { data } = await admin.auth.admin.getUserById(row.user_id);
+        return { user_id: row.user_id, email: data?.user?.email || '', active: row.active, role: row.role, created_at: row.created_at };
+      }));
+      return json({ users });
+    }
+
+    if (action === 'create_license_admin') {
+      if (ownerRow.role !== 'owner') return json({ error: 'Solo el propietario puede crear administradores' }, 403);
+      const email = clean(body.email).toLowerCase();
+      const password = clean(body.password);
+      if (!email || !email.includes('@')) return json({ error: 'Correo de administrador inválido' }, 400);
+      if (password.length < 8) return json({ error: 'La contraseña temporal debe tener mínimo 8 caracteres' }, 400);
+      const { data: created, error: createError } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
+      if (createError) throw createError;
+      if (!created.user) return json({ error: 'No se pudo crear el usuario' }, 500);
+      const { error: roleError } = await admin.from('platform_owners').upsert({ user_id: created.user.id, active: true, role: 'admin' }, { onConflict: 'user_id' });
+      if (roleError) { await admin.auth.admin.deleteUser(created.user.id); throw roleError; }
+      return json({ ok: true, user_id: created.user.id, email, role: 'admin' });
+    }
+
+    if (action === 'set_license_admin_active') {
+      if (ownerRow.role !== 'owner') return json({ error: 'Solo el propietario puede cambiar administradores' }, 403);
+      const targetId = clean(body.user_id);
+      const active = body.active === true;
+      if (!targetId || targetId === user.id) return json({ error: 'No puedes modificar tu propia cuenta propietaria' }, 400);
+      const { data: target, error: findError } = await admin.from('platform_owners').select('role').eq('user_id', targetId).maybeSingle();
+      if (findError) throw findError;
+      if (!target || target.role !== 'admin') return json({ error: 'Administrador no encontrado' }, 404);
+      const { error } = await admin.from('platform_owners').update({ active }).eq('user_id', targetId).eq('role', 'admin');
+      if (error) throw error;
+      return json({ ok: true, user_id: targetId, active });
+    }
 
     if (action === 'owner_dashboard') {
       const [{ data: customers, error: ce }, { data: licenseRows, error: le }] = await Promise.all([
