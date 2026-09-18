@@ -20,11 +20,11 @@ jobs:
       - name: Add preserved features and v1.6.5 enhancements
         shell: bash
         run: |
-          for f in parkops-v1.5.1.js parkops-v1.6.0.js parkops-v1.6.1.js parkops-v1.6.2.js parkops-v1.6.3.js digital-receipts.js; do cp web/$f app/src/main/assets/$f; done
+          for f in parkops-v1.5.1.js parkops-v1.6.0.js parkops-v1.6.1.js parkops-v1.6.2.js parkops-v1.6.3.js parkops-v1.6.4.js parkops-v1.6.4-pro.js parkops-v1.6.5.js; do cp web/$f app/src/main/assets/$f; done
           python3 - <<'PY'
           from pathlib import Path
           p=Path('app/src/main/assets/index.html');s=p.read_text(encoding='utf-8')
-          files=['parkops-v1.5.1.js','parkops-v1.6.0.js','parkops-v1.6.1.js','parkops-v1.6.2.js','parkops-v1.6.3.js','digital-receipts.js']
+          files=['parkops-v1.5.1.js','parkops-v1.6.0.js','parkops-v1.6.1.js','parkops-v1.6.2.js','parkops-v1.6.3.js','parkops-v1.6.4.js','parkops-v1.6.4-pro.js','parkops-v1.6.5.js']
           tag='\n'.join(f'<script src="{x}"></script>' for x in files)
           s=s.replace('</body>',tag+'\n</body>',1) if '</body>' in s else s+tag
           p.write_text(s,encoding='utf-8')
@@ -51,7 +51,7 @@ jobs:
           grep -q 'DEJA / GUARDA CASCO' app/src/main/assets/parkops-v1.6.3.js
           grep -q 'USO DE BAÑO' app/src/main/assets/parkops-v1.6.3.js
           grep -q 'OBSERVACIONES' app/src/main/assets/parkops-v1.6.3.js
-          grep -q 'vatPercent' app/src/main/assets/digital-receipts.js
+          grep -q 'vatPercent' app/src/main/assets/parkops-v1.6.5.js
           ! grep -R -q 'BEGIN PRIVATE KEY' app web
           ! grep -R -q 'SUPABASE_SERVICE_ROLE_KEY' app web
       - uses: actions/setup-java@v4
@@ -72,9 +72,9 @@ jobs:
           unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "Bre-B"
           unzip -p "$APK" assets/parkops-v1.6.0.js | grep -q "LIQUIDAR PAGO · NO LIBERA CUPO"
           unzip -p "$APK" assets/parkops-v1.6.1.js | grep -q "GUARDAR CAPACIDADES"
-          unzip -p "$APK" assets/parkops-v1.6.3.js | grep -q "ASIGNACIÓN Y TARIFA DEL INGRESO"
-          unzip -p "$APK" assets/parkops-v1.6.3.js | grep -q "CORTESÍA · SIN COBRO"
-          unzip -p "$APK" assets/parkops-v1.6.3.js | grep -q "total:0,parqueo:0,recarga:0"
+          unzip -p "$APK" assets/parkops-v1.6.4.js | grep -q "Ubicación y modalidad de cobro"
+          unzip -p "$APK" assets/parkops-v1.6.4.js | grep -q "CORTESÍA · SIN COBRO"
+          unzip -p "$APK" assets/parkops-v1.6.5.js | grep -q "vatPercent"
           unzip -l "$APK" | grep -q 'AndroidManifest.xml'
       - name: Package
         shell: bash
