@@ -8,8 +8,8 @@ android {
         applicationId "com.solvex.parkops"
         minSdk 29
         targetSdk 36
-        versionCode 14
-        versionName "1.6.4"
+        versionCode 15
+        versionName "1.6.5"
     }
     buildTypes { release { minifyEnabled false; proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro' } }
 }
