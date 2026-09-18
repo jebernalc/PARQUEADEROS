@@ -2,7 +2,7 @@ name: Build PARKOPS Licensed APK v1.5.4 IVA Casco Baño
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, feature/iva-casco-bano]
 permissions:
   contents: read
 jobs:
