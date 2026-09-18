@@ -48,7 +48,7 @@ jobs:
           grep -q "LOGO PERSONALIZADO DEL CLIENTE · ABRIR GALERÍA" app/src/main/assets/parkops-v1.6.4-brand-final.js
           grep -q "Abriendo galería" app/src/main/assets/parkops-v1.6.4-brand-final.js
           grep -q "Bre-B" app/src/main/assets/parkops-v1.5.1.js
-          grep -q 'versionName "1.6.5"' app/build.gradle
+          grep -q 'versionName "1.6.6"' app/build.gradle
           grep -q 'GUARDA / DEJA CASCO' app/src/main/assets/parkops-v1.6.4.js
           grep -q 'USO DE BAÑO' app/src/main/assets/parkops-v1.6.4.js
           grep -q 'OBSERVACIONES' app/src/main/assets/parkops-v1.6.4.js
@@ -75,7 +75,7 @@ jobs:
           unzip -p "$APK" assets/parkops-v1.6.4-brand-final.js | grep -q 'parkops-header-client-logo'
           unzip -p "$APK" assets/parkops-v1.6.4-brand-final.js | grep -q 'for="logoFile164"'
           unzip -p "$APK" assets/parkops-v1.6.4-brand-final.js | grep -q 'LOGO PERSONALIZADO DEL CLIENTE · ABRIR GALERÍA'
-          unzip -p "$APK" assets/parkops-v1.6.6.js | grep -q "base:'authoritative-v1.6.4'"
+          unzip -p "$APK" assets/parkops-v1.6.5.js | grep -q "base:'authoritative-v1.6.4'"
           unzip -l "$APK" | grep -q 'classes.dex'
       - name: Package
         shell: bash
