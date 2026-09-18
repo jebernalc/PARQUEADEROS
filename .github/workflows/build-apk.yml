@@ -20,12 +20,12 @@ jobs:
       - name: Add preserved features and v1.6.5 enhancements
         shell: bash
         run: |
-          for f in parkops-v1.5.1.js parkops-v1.6.0.js parkops-v1.6.1.js parkops-v1.6.2.js parkops-v1.6.3.js parkops-v1.6.4.js parkops-v1.6.4-pro.js parkops-v1.6.5.js; do cp web/$f app/src/main/assets/$f; done
+          for f in parkops-v1.5.1.js parkops-v1.6.0.js parkops-v1.6.1.js parkops-v1.6.2.js parkops-v1.6.3.js parkops-v1.6.4.js parkops-v1.6.4-pro.js parkops-v1.6.5.js digital-receipts.js; do cp web/$f app/src/main/assets/$f; done
           python3 - <<'PY'
           from pathlib import Path
           p=Path('app/src/main/assets/index.html');s=p.read_text(encoding='utf-8')
-          files=['parkops-v1.5.1.js','parkops-v1.6.0.js','parkops-v1.6.1.js','parkops-v1.6.2.js','parkops-v1.6.3.js','parkops-v1.6.4.js','parkops-v1.6.4-pro.js','parkops-v1.6.5.js']
-          tag='\n'.join(f'<script src="{x}"></script>' for x in files)
+          files=['parkops-v1.5.1.js','parkops-v1.6.0.js','parkops-v1.6.1.js','parkops-v1.6.2.js','parkops-v1.6.3.js','parkops-v1.6.4.js','parkops-v1.6.4-pro.js','digital-receipts.js','parkops-v1.6.5.js']
+          tag='\n'.join(f'<script src="{x}"></script>' for x in files if x not in s)
           s=s.replace('</body>',tag+'\n</body>',1) if '</body>' in s else s+tag
           p.write_text(s,encoding='utf-8')
           PY
@@ -48,9 +48,9 @@ jobs:
           grep -q "isCourtesy" app/src/main/assets/parkops-v1.6.3.js
           grep -q "total:0,parqueo:0,recarga:0" app/src/main/assets/parkops-v1.6.3.js
           grep -q 'versionName "1.6.5"' app/build.gradle
-          grep -q 'DEJA / GUARDA CASCO' app/src/main/assets/parkops-v1.6.3.js
-          grep -q 'USO DE BAÑO' app/src/main/assets/parkops-v1.6.3.js
-          grep -q 'OBSERVACIONES' app/src/main/assets/parkops-v1.6.3.js
+          grep -q 'GUARDA / DEJA CASCO' app/src/main/assets/parkops-v1.6.4.js
+          grep -q 'USO DE BAÑO' app/src/main/assets/parkops-v1.6.4.js
+          grep -q 'OBSERVACIONES' app/src/main/assets/parkops-v1.6.4.js
           grep -q 'vatPercent' app/src/main/assets/parkops-v1.6.5.js
           ! grep -R -q 'BEGIN PRIVATE KEY' app web
           ! grep -R -q 'SUPABASE_SERVICE_ROLE_KEY' app web
@@ -75,6 +75,8 @@ jobs:
           unzip -p "$APK" assets/parkops-v1.6.4.js | grep -q "Ubicación y modalidad de cobro"
           unzip -p "$APK" assets/parkops-v1.6.4.js | grep -q "CORTESÍA · SIN COBRO"
           unzip -p "$APK" assets/parkops-v1.6.5.js | grep -q "vatPercent"
+          unzip -p "$APK" assets/digital-receipts.js | grep -q "pc-vat"
+          unzip -p "$APK" assets/parkops-v1.6.4.js | grep -q "helmet164"
           unzip -l "$APK" | grep -q 'AndroidManifest.xml'
       - name: Package
         shell: bash
