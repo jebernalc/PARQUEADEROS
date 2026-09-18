@@ -63,7 +63,9 @@ jobs:
           grep -q "CREAR CONTRASEÑA ADMINISTRATIVA" app/src/main/assets/parkops-v1.6.7.js
           grep -q "modal(!read())" app/src/main/assets/parkops-v1.6.7.js
           ! grep -q "if(!read())modal(true)" app/src/main/assets/parkops-v1.6.7.js
-          grep -q "monthly-occupancy-in-patio" app/src/main/assets/parkops-v1.6.8.js
+          grep -q "repairMonthlyOccupancy" app/src/main/assets/parkops-v1.6.8.js
+          ! grep -q "pintarPatio=function" app/src/main/assets/parkops-v1.6.8.js
+          ! grep -q "refrescar=function" app/src/main/assets/parkops-v1.6.8.js
           grep -q "MENSUALIDAD · EN PATIO" app/src/main/assets/parkops-v1.6.8.js
           ! grep -R -q 'SUPABASE_SERVICE_ROLE_KEY' app web
       - uses: actions/setup-java@v4
@@ -84,7 +86,7 @@ jobs:
           unzip -p "$APK" assets/parkops-v1.6.4-brand-final.js | grep -q 'LOGO PERSONALIZADO DEL CLIENTE · ABRIR GALERÍA'
           unzip -p "$APK" assets/parkops-v1.6.5.js | grep -q "base:'authoritative-v1.6.4'"
           unzip -p "$APK" assets/parkops-v1.6.7.js | grep -q 'PBKDF2'
-          unzip -p "$APK" assets/parkops-v1.6.8.js | grep -q 'monthly-capacity-count'
+          unzip -p "$APK" assets/parkops-v1.6.8.js | grep -q 'repairMonthlyOccupancy'
           unzip -l "$APK" | grep -q 'classes.dex'
       - name: Package
         shell: bash
@@ -97,4 +99,4 @@ jobs:
           name: PARKOPS-SOLVEX-LICENSED-v1.6.8
           path: release/
           if-no-files-found: error
-# v1.6.8 monthly vehicles remain visible and counted in patio occupancy
+# v1.6.8 corrected: no recursive patio/refresh wrappers
