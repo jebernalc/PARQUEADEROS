@@ -47,6 +47,8 @@ jobs:
           grep -q 'vatPercent' app/src/main/assets/digital-receipts.js
           grep -q 'Guarda casco' app/src/main/assets/digital-receipts.js
           grep -q 'Uso / ingreso al baño' app/src/main/assets/digital-receipts.js
+          grep -q 'Observaciones' app/src/main/assets/digital-receipts.js
+          grep -q 'parkops-observations' app/src/main/assets/digital-receipts.js
           ! grep -q '3114980095' app/src/main/assets/index.html
           ! grep -R -q 'BEGIN PRIVATE KEY' app
           ! grep -R -q 'SUPABASE_SERVICE_ROLE_KEY' app
@@ -67,6 +69,7 @@ jobs:
           unzip -p "$APK" assets/index.html | grep -q "parkops-v1.5.1.js"
           unzip -p "$APK" assets/index.html | grep -q "digital-receipts.js"
           unzip -p "$APK" assets/digital-receipts.js | grep -q "vatPercent"
+          unzip -p "$APK" assets/digital-receipts.js | grep -q "parkops-observations"
           unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "findClock"
           unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "● ONLINE"
           unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "● OFFLINE"
@@ -83,3 +86,5 @@ jobs:
           name: PARKOPS-SOLVEX-LICENSED-v1.5.4
           path: release/
           if-no-files-found: error
+
+# build trigger: v1.5.4 observations
