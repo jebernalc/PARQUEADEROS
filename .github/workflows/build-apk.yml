@@ -1,4 +1,4 @@
-name: Build PARKOPS Licensed APK v1.5.3
+name: Build PARKOPS Licensed APK v1.5.4 IVA Casco Baño
 on:
   workflow_dispatch:
   push:
@@ -22,9 +22,10 @@ jobs:
         shell: bash
         run: |
           cp web/parkops-v1.5.1.js app/src/main/assets/parkops-v1.5.1.js
+          cp web/digital-receipts.js app/src/main/assets/digital-receipts.js
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('app/src/main/assets/index.html');s=p.read_text(encoding='utf-8');tag='<script src="parkops-v1.5.1.js"></script>';s=s.replace('</body>',tag+'\n</body>',1) if '</body>' in s else s+tag;p.write_text(s,encoding='utf-8')
+          p=Path('app/src/main/assets/index.html');s=p.read_text(encoding='utf-8');tag='<script src="parkops-v1.5.1.js"></script><script src="digital-receipts.js"></script>';s=s.replace('</body>',tag+'\n</body>',1) if '</body>' in s else s+tag;p.write_text(s,encoding='utf-8')
           PY
       - name: Validate preserved app and requested fix only
         shell: bash
@@ -40,7 +41,12 @@ jobs:
           grep -q "positionStatus" app/src/main/assets/parkops-v1.5.1.js
           grep -q "● ONLINE" app/src/main/assets/parkops-v1.5.1.js
           grep -q "● OFFLINE" app/src/main/assets/parkops-v1.5.1.js
-          grep -q 'versionName "1.5.3"' app/build.gradle
+          grep -q 'versionName "1.5.4"' app/build.gradle
+          grep -q 'helmetFee' app/src/main/assets/digital-receipts.js
+          grep -q 'bathroomFee' app/src/main/assets/digital-receipts.js
+          grep -q 'vatPercent' app/src/main/assets/digital-receipts.js
+          grep -q 'Guarda casco' app/src/main/assets/digital-receipts.js
+          grep -q 'Uso / ingreso al baño' app/src/main/assets/digital-receipts.js
           ! grep -q '3114980095' app/src/main/assets/index.html
           ! grep -R -q 'BEGIN PRIVATE KEY' app
           ! grep -R -q 'SUPABASE_SERVICE_ROLE_KEY' app
@@ -59,6 +65,8 @@ jobs:
           APK=app/build/outputs/apk/debug/app-debug.apk
           test -f "$APK"
           unzip -p "$APK" assets/index.html | grep -q "parkops-v1.5.1.js"
+          unzip -p "$APK" assets/index.html | grep -q "digital-receipts.js"
+          unzip -p "$APK" assets/digital-receipts.js | grep -q "vatPercent"
           unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "findClock"
           unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "● ONLINE"
           unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "● OFFLINE"
@@ -68,10 +76,10 @@ jobs:
         shell: bash
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.5.3.apk
-          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.5.3.apk > release/PARKOPS-SOLVEX-LICENSED-v1.5.3.sha256
+          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.5.4.apk
+          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.5.4.apk > release/PARKOPS-SOLVEX-LICENSED-v1.5.4.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: PARKOPS-SOLVEX-LICENSED-v1.5.3
+          name: PARKOPS-SOLVEX-LICENSED-v1.5.4
           path: release/
           if-no-files-found: error
