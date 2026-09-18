@@ -1,8 +1,8 @@
-name: Build PARKOPS Licensed APK v1.6.5 AUTHORITATIVE
+name: Build PARKOPS Licensed APK v1.6.6 AUTHORITATIVE
 on:
   workflow_dispatch:
   push:
-    branches: [apk-v1.6.5-from-authoritative-v1.6.4]
+    branches: [apk-v1.6.6-from-authoritative-v1.6.4]
 permissions:
   contents: read
 jobs:
@@ -19,15 +19,15 @@ jobs:
       - name: Add PARKOPS v1.6.4 enhancements
         shell: bash
         run: |
-          for f in parkops-v1.5.1.js parkops-v1.6.0.js parkops-v1.6.1.js parkops-v1.6.2.js parkops-v1.6.3.js parkops-v1.6.4.js parkops-v1.6.4-pro.js parkops-v1.6.4-brand-final.js parkops-v1.6.5.js; do cp web/$f app/src/main/assets/$f; done
+          for f in parkops-v1.5.1.js parkops-v1.6.0.js parkops-v1.6.1.js parkops-v1.6.2.js parkops-v1.6.3.js parkops-v1.6.4.js parkops-v1.6.4-pro.js parkops-v1.6.4-brand-final.js parkops-v1.6.6.js; do cp web/$f app/src/main/assets/$f; done
           python3 - <<'PY'
           from pathlib import Path
           p=Path('app/src/main/assets/index.html');s=p.read_text()
-          files=['parkops-v1.5.1.js','parkops-v1.6.0.js','parkops-v1.6.1.js','parkops-v1.6.2.js','parkops-v1.6.3.js','parkops-v1.6.4.js','parkops-v1.6.4-pro.js','parkops-v1.6.4-brand-final.js','parkops-v1.6.5.js']
+          files=['parkops-v1.5.1.js','parkops-v1.6.0.js','parkops-v1.6.1.js','parkops-v1.6.2.js','parkops-v1.6.3.js','parkops-v1.6.4.js','parkops-v1.6.4-pro.js','parkops-v1.6.4-brand-final.js','parkops-v1.6.6.js']
           tag='\n'.join(f'<script src="{x}"></script>' for x in files)
           p.write_text(s.replace('</body>',tag+'\n</body>',1))
           PY
-      - name: Validate authoritative v1.6.4 plus requested v1.6.5 changes
+      - name: Validate authoritative v1.6.4 plus requested v1.6.6 changes
         shell: bash
         run: |
           set -euo pipefail
@@ -55,6 +55,9 @@ jobs:
           grep -q 'helmetFee165' app/src/main/assets/parkops-v1.6.4-pro.js
           grep -q 'bathroomFee165' app/src/main/assets/parkops-v1.6.4-pro.js
           grep -q 'vatPercent165' app/src/main/assets/parkops-v1.6.4-pro.js
+          grep -q 'helmetPrice165' app/src/main/assets/parkops-v1.6.4.js
+          grep -q 'bathroomPrice165' app/src/main/assets/parkops-v1.6.4.js
+          grep -q 'servicesBreakdown165' app/src/main/assets/parkops-v1.6.5.js
           ! grep -R -q 'SUPABASE_SERVICE_ROLE_KEY' app web
       - uses: actions/setup-java@v4
         with: {distribution: temurin, java-version: '17'}
@@ -72,16 +75,16 @@ jobs:
           unzip -p "$APK" assets/parkops-v1.6.4-brand-final.js | grep -q 'parkops-header-client-logo'
           unzip -p "$APK" assets/parkops-v1.6.4-brand-final.js | grep -q 'for="logoFile164"'
           unzip -p "$APK" assets/parkops-v1.6.4-brand-final.js | grep -q 'LOGO PERSONALIZADO DEL CLIENTE · ABRIR GALERÍA'
-          unzip -p "$APK" assets/parkops-v1.6.5.js | grep -q "base:'authoritative-v1.6.4'"
+          unzip -p "$APK" assets/parkops-v1.6.6.js | grep -q "base:'authoritative-v1.6.4'"
           unzip -l "$APK" | grep -q 'classes.dex'
       - name: Package
         shell: bash
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.6.5.apk
-          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.6.5.apk > release/PARKOPS-SOLVEX-LICENSED-v1.6.5.sha256
+          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.6.6.apk
+          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.6.6.apk > release/PARKOPS-SOLVEX-LICENSED-v1.6.6.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: PARKOPS-SOLVEX-LICENSED-v1.6.5
+          name: PARKOPS-SOLVEX-LICENSED-v1.6.6
           path: release/
           if-no-files-found: error
