@@ -176,6 +176,23 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === 'delete_license') {
+      const id = clean(body.license_id);
+      if (!id) return json({ error: 'license_id obligatorio' }, 400);
+      const { data: existing, error: findError } = await admin.from('licencias').select('id').eq('id', id).maybeSingle();
+      if (findError) throw findError;
+      if (!existing) return json({ error: 'Licencia no encontrada' }, 404);
+
+      // Remove only records owned by this license. Customer/site data is preserved.
+      const { error: deviceError } = await admin.from('dispositivos').delete().eq('licencia_id', id);
+      if (deviceError) throw deviceError;
+      const { error: paymentError } = await admin.from('pagos').delete().eq('licencia_id', id);
+      if (paymentError) throw paymentError;
+      const { error: licenseError } = await admin.from('licencias').delete().eq('id', id);
+      if (licenseError) throw licenseError;
+      return json({ ok: true, deleted_license_id: id });
+    }
+
     if (action === 'revoke_license') {
       const id = clean(body.license_id);
       if (!id) return json({ error: 'license_id obligatorio' }, 400);
