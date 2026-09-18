@@ -83,3 +83,5 @@ jobs:
           name: PARKOPS-SOLVEX-LICENSED-v1.6.5
           path: release/
           if-no-files-found: error
+
+# trigger build v1.6.5 complete improvements
