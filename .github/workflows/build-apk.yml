@@ -1,8 +1,8 @@
-name: Build PARKOPS Licensed APK v1.6.3
+name: Build PARKOPS Licensed APK v1.6.5
 on:
   workflow_dispatch:
   push:
-    branches: [apk-v1.6.0-capacidad]
+    branches: [apk-v1.6.5-iva-casco-bano-observaciones]
 permissions:
   contents: read
 jobs:
@@ -17,19 +17,19 @@ jobs:
           cat source/real-app/index.html.gz.b64.* | base64 --decode | gzip -dc > app/src/main/assets/index.html
           echo "ca465ce85dcdd084aee889972e931716366ae8402ac48e1f562a05e709d26407  app/src/main/assets/index.html" | sha256sum -c -
           test "$(wc -c < app/src/main/assets/index.html)" -eq 64455
-      - name: Add preserved features and v1.6.3 enhancements
+      - name: Add preserved features and v1.6.5 enhancements
         shell: bash
         run: |
-          for f in parkops-v1.5.1.js parkops-v1.6.0.js parkops-v1.6.1.js parkops-v1.6.2.js parkops-v1.6.3.js; do cp web/$f app/src/main/assets/$f; done
+          for f in parkops-v1.5.1.js parkops-v1.6.0.js parkops-v1.6.1.js parkops-v1.6.2.js parkops-v1.6.3.js digital-receipts.js; do cp web/$f app/src/main/assets/$f; done
           python3 - <<'PY'
           from pathlib import Path
           p=Path('app/src/main/assets/index.html');s=p.read_text(encoding='utf-8')
-          files=['parkops-v1.5.1.js','parkops-v1.6.0.js','parkops-v1.6.1.js','parkops-v1.6.2.js','parkops-v1.6.3.js']
+          files=['parkops-v1.5.1.js','parkops-v1.6.0.js','parkops-v1.6.1.js','parkops-v1.6.2.js','parkops-v1.6.3.js','digital-receipts.js']
           tag='\n'.join(f'<script src="{x}"></script>' for x in files)
           s=s.replace('</body>',tag+'\n</body>',1) if '</body>' in s else s+tag
           p.write_text(s,encoding='utf-8')
           PY
-      - name: Regression and v1.6.3 validation
+      - name: Regression and v1.6.5 validation
         shell: bash
         run: |
           set -euo pipefail
@@ -68,18 +68,18 @@ jobs:
           unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "Bre-B"
           unzip -p "$APK" assets/parkops-v1.6.0.js | grep -q "LIQUIDAR PAGO · NO LIBERA CUPO"
           unzip -p "$APK" assets/parkops-v1.6.1.js | grep -q "GUARDAR CAPACIDADES"
-          unzip -p "$APK" assets/parkops-v1.6.3.js | grep -q "ASIGNACIÓN Y TARIFA DEL INGRESO"
-          unzip -p "$APK" assets/parkops-v1.6.3.js | grep -q "CORTESÍA · SIN COBRO"
-          unzip -p "$APK" assets/parkops-v1.6.3.js | grep -q "total:0,parqueo:0,recarga:0"
+          unzip -p "$APK" assets/parkops-v1.6.5.js | grep -q "ASIGNACIÓN Y TARIFA DEL INGRESO"
+          unzip -p "$APK" assets/parkops-v1.6.5.js | grep -q "CORTESÍA · SIN COBRO"
+          unzip -p "$APK" assets/parkops-v1.6.5.js | grep -q "total:0,parqueo:0,recarga:0"
           unzip -l "$APK" | grep -q 'AndroidManifest.xml'
       - name: Package
         shell: bash
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.6.3.apk
-          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.6.3.apk > release/PARKOPS-SOLVEX-LICENSED-v1.6.3.sha256
+          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.6.5.apk
+          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.6.5.apk > release/PARKOPS-SOLVEX-LICENSED-v1.6.5.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: PARKOPS-SOLVEX-LICENSED-v1.6.3
+          name: PARKOPS-SOLVEX-LICENSED-v1.6.5
           path: release/
           if-no-files-found: error
