@@ -47,7 +47,11 @@ jobs:
           grep -q "CORTESÍA · SIN COBRO" app/src/main/assets/parkops-v1.6.3.js
           grep -q "isCourtesy" app/src/main/assets/parkops-v1.6.3.js
           grep -q "total:0,parqueo:0,recarga:0" app/src/main/assets/parkops-v1.6.3.js
-          grep -q 'versionName "1.6.3"' app/build.gradle
+          grep -q 'versionName "1.6.5"' app/build.gradle
+          grep -q 'DEJA / GUARDA CASCO' app/src/main/assets/parkops-v1.6.3.js
+          grep -q 'USO DE BAÑO' app/src/main/assets/parkops-v1.6.3.js
+          grep -q 'OBSERVACIONES' app/src/main/assets/parkops-v1.6.3.js
+          grep -q 'vatPercent' app/src/main/assets/digital-receipts.js
           ! grep -R -q 'BEGIN PRIVATE KEY' app web
           ! grep -R -q 'SUPABASE_SERVICE_ROLE_KEY' app web
       - uses: actions/setup-java@v4
