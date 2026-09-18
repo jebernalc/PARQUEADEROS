@@ -19,11 +19,11 @@ jobs:
       - name: Add PARKOPS v1.6.4 enhancements
         shell: bash
         run: |
-          for f in parkops-v1.5.1.js parkops-v1.6.0.js parkops-v1.6.1.js parkops-v1.6.2.js parkops-v1.6.3.js parkops-v1.6.4.js parkops-v1.6.4-pro.js parkops-v1.6.4-brand-final.js parkops-v1.6.6.js; do cp web/$f app/src/main/assets/$f; done
+          for f in parkops-v1.5.1.js parkops-v1.6.0.js parkops-v1.6.1.js parkops-v1.6.2.js parkops-v1.6.3.js parkops-v1.6.4.js parkops-v1.6.4-pro.js parkops-v1.6.4-brand-final.js parkops-v1.6.5.js; do cp web/$f app/src/main/assets/$f; done
           python3 - <<'PY'
           from pathlib import Path
           p=Path('app/src/main/assets/index.html');s=p.read_text()
-          files=['parkops-v1.5.1.js','parkops-v1.6.0.js','parkops-v1.6.1.js','parkops-v1.6.2.js','parkops-v1.6.3.js','parkops-v1.6.4.js','parkops-v1.6.4-pro.js','parkops-v1.6.4-brand-final.js','parkops-v1.6.6.js']
+          files=['parkops-v1.5.1.js','parkops-v1.6.0.js','parkops-v1.6.1.js','parkops-v1.6.2.js','parkops-v1.6.3.js','parkops-v1.6.4.js','parkops-v1.6.4-pro.js','parkops-v1.6.4-brand-final.js','parkops-v1.6.5.js']
           tag='\n'.join(f'<script src="{x}"></script>' for x in files)
           p.write_text(s.replace('</body>',tag+'\n</body>',1))
           PY
