@@ -72,9 +72,9 @@ jobs:
           unzip -p "$APK" assets/parkops-v1.5.1.js | grep -q "Bre-B"
           unzip -p "$APK" assets/parkops-v1.6.0.js | grep -q "LIQUIDAR PAGO · NO LIBERA CUPO"
           unzip -p "$APK" assets/parkops-v1.6.1.js | grep -q "GUARDAR CAPACIDADES"
-          unzip -p "$APK" assets/parkops-v1.6.5.js | grep -q "ASIGNACIÓN Y TARIFA DEL INGRESO"
-          unzip -p "$APK" assets/parkops-v1.6.5.js | grep -q "CORTESÍA · SIN COBRO"
-          unzip -p "$APK" assets/parkops-v1.6.5.js | grep -q "total:0,parqueo:0,recarga:0"
+          unzip -p "$APK" assets/parkops-v1.6.3.js | grep -q "ASIGNACIÓN Y TARIFA DEL INGRESO"
+          unzip -p "$APK" assets/parkops-v1.6.3.js | grep -q "CORTESÍA · SIN COBRO"
+          unzip -p "$APK" assets/parkops-v1.6.3.js | grep -q "total:0,parqueo:0,recarga:0"
           unzip -l "$APK" | grep -q 'AndroidManifest.xml'
       - name: Package
         shell: bash
