@@ -23,7 +23,7 @@ jobs:
         shell: bash
         run: |
           grep -q 'applicationId "com.solvex.parkops.owner"' ownerapp/build.gradle
-          grep -q 'versionName "1.3.0"' ownerapp/build.gradle
+          grep -q 'versionName "1.4.0"' ownerapp/build.gradle
           grep -q 'jbernalcristancho82@hotmail.com' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
           grep -q 'CREAR / ACTIVAR NUEVA CUENTA' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
           grep -q '/auth/v1/signup' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
