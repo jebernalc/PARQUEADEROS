@@ -38,19 +38,19 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MainActivity extends Activity {
-    private static final int BG=Color.rgb(20,23,28), CARD=Color.rgb(28,33,40), TEXT=Color.WHITE, MUTED=Color.LTGRAY;
+    private static final int BG=Color.rgb(9,18,32), CARD=Color.rgb(18,32,50), TEXT=Color.WHITE, MUTED=Color.rgb(170,187,205), ACCENT=Color.rgb(0,188,212), GOLD=Color.rgb(255,193,7), DANGER=Color.rgb(239,83,80);
     private static final String SUPABASE_URL="https://epadzsrfsvckyjugcvpd.supabase.co";
     private static final String PUBLISHABLE_KEY="sb_publishable_PxFa4vMqovqCIDOwEsoiBQ_2q2jETc_";
     private static final String DEFAULT_EMAIL="jbernalcristancho82@hotmail.com";
     private final ExecutorService io=Executors.newSingleThreadExecutor();
     private LinearLayout root;
-    private String token="";
+    private String token="", currentRole="admin";
     private final List<JSONObject> organizations=new ArrayList<>(), licenses=new ArrayList<>();
 
     @Override protected void onCreate(Bundle b){super.onCreate(b);getWindow().setStatusBarColor(BG);showLogin();}
     private TextView txt(String s,int sp){TextView v=new TextView(this);v.setText(s);v.setTextColor(TEXT);v.setTextSize(sp);v.setPadding(0,9,0,9);return v;}
     private EditText input(String h){EditText e=new EditText(this);e.setHint(h);e.setTextColor(TEXT);e.setHintTextColor(MUTED);e.setSingleLine(true);return e;}
-    private Button btn(String s){Button b=new Button(this);b.setText(s);return b;}
+    private Button btn(String s){Button b=new Button(this);b.setText(s);b.setTextColor(TEXT);b.setTextSize(14);b.setAllCaps(false);b.setBackgroundColor(ACCENT);b.setPadding(16,14,16,14);LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);lp.setMargins(0,6,0,6);b.setLayoutParams(lp);return b;}
     private void shell(){ScrollView sc=new ScrollView(this);sc.setBackgroundColor(BG);root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(26,24,26,40);sc.addView(root,new ScrollView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT));setContentView(sc);}
     private void toast(String s){runOnUiThread(()->Toast.makeText(this,s,Toast.LENGTH_LONG).show());}
     private LinearLayout card(){LinearLayout c=new LinearLayout(this);c.setOrientation(LinearLayout.VERTICAL);c.setPadding(18,14,18,14);c.setBackgroundColor(CARD);LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);lp.setMargins(0,8,0,8);c.setLayoutParams(lp);return c;}
@@ -106,6 +106,7 @@ public class MainActivity extends Activity {
                 boot=master(new JSONObject().put("action","owner_bootstrap"));
             }
             if(boot.has("error"))throw new Exception(boot.optString("error"));
+            currentRole=boot.optString("role","admin");
             getPreferences(MODE_PRIVATE).edit().putString("email",email).apply();
             loadDashboard();
         }catch(Exception e){toast("Acceso rechazado: "+e.getMessage());runOnUiThread(this::showLogin);}
@@ -117,10 +118,24 @@ public class MainActivity extends Activity {
 
     private void showHome(JSONObject metrics){
         shell();root.addView(txt("SOLVEX · ADMINISTRADOR DE LICENCIAS",23));if(metrics!=null)root.addView(txt("Clientes: "+metrics.optInt("clients")+"   ·   Licencias activas: "+metrics.optInt("active_licenses")+"   ·   Dispositivos: "+metrics.optInt("active_devices"),14));
-        Button newCustomer=btn("+ REGISTRAR NUEVO CLIENTE"),generate=btn("GENERAR NUEVA LICENCIA"),clients=btn("CLIENTES Y LICENCIAS"),refresh=btn("ACTUALIZAR INFORMACIÓN"),logout=btn("CERRAR SESIÓN");
-        root.addView(newCustomer);root.addView(generate);root.addView(clients);root.addView(refresh);root.addView(logout);
+        TextView badge=txt("Panel seguro · "+("owner".equals(currentRole)?"PROPIETARIO":"ADMINISTRADOR"),13);badge.setTextColor(GOLD);root.addView(badge);
+        Button newCustomer=btn("+ REGISTRAR NUEVO CLIENTE"),generate=btn("GENERAR NUEVA LICENCIA"),clients=btn("CLIENTES Y LICENCIAS"),admins=btn("ADMINISTRADORES DE LICENCIAS"),refresh=btn("ACTUALIZAR INFORMACIÓN"),logout=btn("CERRAR SESIÓN");
+        root.addView(newCustomer);root.addView(generate);root.addView(clients);if("owner".equals(currentRole))root.addView(admins);root.addView(refresh);root.addView(logout);
+        admins.setOnClickListener(v->showAdmins());
         TextView info=txt("Flujo: registrar cliente → copiar ANDROID_ID desde PARKOPS → generar licencia → enviar por WhatsApp. La licencia queda ligada a ese dispositivo.",14);info.setTextColor(MUTED);root.addView(info);
         newCustomer.setOnClickListener(v->showNewCustomer());generate.setOnClickListener(v->showGenerator(-1));clients.setOnClickListener(v->showClients());refresh.setOnClickListener(v->io.execute(()->{try{loadDashboard();}catch(Exception e){toast(e.getMessage());}}));logout.setOnClickListener(v->{token="";showLogin();});
+    }
+
+    private void showAdmins(){
+        shell();root.addView(txt("ADMINISTRADORES DE LICENCIAS",23));TextView sub=txt("Crea accesos independientes para tu equipo. Los administradores pueden gestionar clientes y licencias, pero no crear otros administradores.",13);sub.setTextColor(MUTED);root.addView(sub);
+        EditText email=input("Correo del nuevo administrador"),pass=input("Contraseña temporal (mínimo 8 caracteres)");pass.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD);root.addView(email);root.addView(pass);
+        Button create=btn("+ CREAR ADMINISTRADOR"),back=btn("VOLVER");root.addView(create);LinearLayout list=new LinearLayout(this);list.setOrientation(LinearLayout.VERTICAL);root.addView(list);root.addView(back);back.setOnClickListener(v->showHome(null));
+        create.setOnClickListener(v->{String em=email.getText().toString().trim(),pw=pass.getText().toString();if(em.isEmpty()||pw.length()<8){toast("Correo válido y contraseña de mínimo 8 caracteres");return;}create.setEnabled(false);io.execute(()->{try{JSONObject r=master(new JSONObject().put("action","create_license_admin").put("email",em).put("password",pw));if(r.has("error"))throw new Exception(r.optString("error"));toast("Administrador creado correctamente");runOnUiThread(()->{email.setText("");pass.setText("");create.setEnabled(true);});loadAdmins(list);}catch(Exception e){toast("No se pudo crear: "+e.getMessage());runOnUiThread(()->create.setEnabled(true));}});});
+        io.execute(()->{try{loadAdmins(list);}catch(Exception e){toast("No se pudieron cargar administradores: "+e.getMessage());}});
+    }
+
+    private void loadAdmins(LinearLayout list)throws Exception{
+        JSONObject r=master(new JSONObject().put("action","list_license_admins"));if(r.has("error"))throw new Exception(r.optString("error"));JSONArray users=r.optJSONArray("users");runOnUiThread(()->{list.removeAllViews();if(users==null)return;for(int i=0;i<users.length();i++){JSONObject u=users.optJSONObject(i);if(u==null)continue;String role=u.optString("role"),uid=u.optString("user_id"),em=u.optString("email","—");boolean active=u.optBoolean("active");LinearLayout c=card();TextView name=txt(("owner".equals(role)?"★ PROPIETARIO":"ADMINISTRADOR")+" · "+(active?"ACTIVO":"INACTIVO"),15);name.setTextColor("owner".equals(role)?GOLD:(active?ACCENT:MUTED));c.addView(name);c.addView(txt(em,13));if("admin".equals(role)){Button toggle=btn(active?"DESACTIVAR ACCESO":"ACTIVAR ACCESO");if(active)toggle.setBackgroundColor(DANGER);c.addView(toggle);toggle.setOnClickListener(v->io.execute(()->{try{JSONObject z=master(new JSONObject().put("action","set_license_admin_active").put("user_id",uid).put("active",!active));if(z.has("error"))throw new Exception(z.optString("error"));toast(!active?"Administrador activado":"Administrador desactivado");loadAdmins(list);}catch(Exception e){toast("No se pudo cambiar acceso: "+e.getMessage());}}));}list.addView(c);}});
     }
 
     private void showNewCustomer(){
