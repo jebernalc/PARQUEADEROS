@@ -1,4 +1,4 @@
-name: Build PARKOPS Licensed APK v1.6.7 AUTHORITATIVE
+name: Build PARKOPS Licensed APK v1.6.7.1 CONFIG-ONLY AUTH
 on:
   workflow_dispatch:
   push:
@@ -27,7 +27,7 @@ jobs:
           tag='\n'.join(f'<script src="{x}"></script>' for x in files)
           p.write_text(s.replace('</body>',tag+'\n</body>',1))
           PY
-      - name: Validate authoritative v1.6.4 plus requested v1.6.7 changes
+      - name: Validate authoritative v1.6.4 plus requested v1.6.7.1 changes
         shell: bash
         run: |
           set -euo pipefail
@@ -48,7 +48,7 @@ jobs:
           grep -q "LOGO PERSONALIZADO DEL CLIENTE · ABRIR GALERÍA" app/src/main/assets/parkops-v1.6.4-brand-final.js
           grep -q "Abriendo galería" app/src/main/assets/parkops-v1.6.4-brand-final.js
           grep -q "Bre-B" app/src/main/assets/parkops-v1.5.1.js
-          grep -q 'versionName "1.6.7"' app/build.gradle
+          grep -q 'versionName "1.6.7.1"' app/build.gradle
           grep -q 'GUARDA / DEJA CASCO' app/src/main/assets/parkops-v1.6.4.js
           grep -q 'USO DE BAÑO' app/src/main/assets/parkops-v1.6.4.js
           grep -q 'OBSERVACIONES' app/src/main/assets/parkops-v1.6.4.js
@@ -61,6 +61,8 @@ jobs:
           grep -q "PBKDF2" app/src/main/assets/parkops-v1.6.7.js
           grep -q "CONFIGURACIÓN PROTEGIDA" app/src/main/assets/parkops-v1.6.7.js
           grep -q "CREAR CONTRASEÑA ADMINISTRATIVA" app/src/main/assets/parkops-v1.6.7.js
+          grep -q "modal(!read())" app/src/main/assets/parkops-v1.6.7.js
+          ! grep -q "if(!read())modal(true)" app/src/main/assets/parkops-v1.6.7.js
           ! grep -R -q 'SUPABASE_SERVICE_ROLE_KEY' app web
       - uses: actions/setup-java@v4
         with: {distribution: temurin, java-version: '17'}
@@ -85,11 +87,11 @@ jobs:
         shell: bash
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.6.7.apk
-          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.6.7.apk > release/PARKOPS-SOLVEX-LICENSED-v1.6.7.sha256
+          cp app/build/outputs/apk/debug/app-debug.apk release/PARKOPS-SOLVEX-LICENSED-v1.6.7.1.apk
+          sha256sum release/PARKOPS-SOLVEX-LICENSED-v1.6.7.1.apk > release/PARKOPS-SOLVEX-LICENSED-v1.6.7.1.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: PARKOPS-SOLVEX-LICENSED-v1.6.7
+          name: PARKOPS-SOLVEX-LICENSED-v1.6.7.1
           path: release/
           if-no-files-found: error
-# rebuild v1.6.7 final service-price behavior
+# v1.6.7.1 password is requested only when configuration is opened
