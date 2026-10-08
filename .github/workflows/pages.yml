@@ -67,8 +67,12 @@ jobs:
           cp parksolvex-web/web/cloud-sync.js dist/cloud-sync.js
           cp web/manifest.webmanifest dist/manifest.webmanifest
           cp web/sw.js dist/sw.js
-          mkdir -p dist/admin
+          mkdir -p dist/admin dist/owner
           cp -R parksolvex-web/admin/. dist/admin/
+          cp web/owner/index.html dist/owner/index.html
+          cp web/app.js dist/app.js
+          cp web/config.js dist/config.js
+          cp web/styles.css dist/styles.css
           python3 - <<'PY'
           from pathlib import Path
           p=Path('dist/index.html');s=p.read_text(encoding='utf-8')
@@ -99,6 +103,9 @@ jobs:
           grep -q 'Medios de pago' dist/admin/index.html
           grep -q 'parkops-web-v1.5.3-cloud-r3' dist/sw.js
           test -f dist/version.json
+          test -f dist/owner/index.html
+          test -f dist/app.js
+          test -f dist/config.js
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
