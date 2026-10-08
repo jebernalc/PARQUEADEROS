@@ -11,6 +11,8 @@ on:
       - "web/manifest.webmanifest"
       - "web/sw.js"
       - "parksolvex-web/**"
+      - "web/parkops/**"
+      - "web/owner/**"
       - ".github/workflows/pages.yml"
 permissions:
   contents: read
@@ -83,6 +85,27 @@ jobs:
           p.write_text(s,encoding='utf-8')
           PY
           printf '%s\n' '{"product":"PARKSOLVEX WEB","webVersion":"1.5.3-web-cloud","apkCore":"1.5.3","source":"exact-apk-core+supabase-sync","admin":"/admin/","apkIndexSha256":"2ae5261f8ceae9af99a3cf4cec7cea2d1c1254cb8a3a2323c667a0335589627e"}' > dist/version.json
+      - name: Publicar PARKOPS 1.6.6 (operación web, consola de licencias y APK)
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Conjunto autónomo: cada archivo trae todo incrustado y no depende
+          # del núcleo v1.5.3 de arriba. Se publica tal cual, sin recomponer.
+          mkdir -p dist/parkops
+          cp -R web/parkops/. dist/parkops/
+          test -f dist/parkops/index.html
+          test -f dist/parkops/licencias.html
+          test -f dist/parkops/PARKOPS-OPERACION-v1_6_6.apk
+          test -f dist/parkops/SOLVEX-LICENCIAS-v1_4_0.apk
+          grep -q 'parkops-v1.6.6.js' dist/parkops/index.html
+          grep -q 'chkCasco166'       dist/parkops/index.html
+          grep -q 'svcTarifas166'     dist/parkops/index.html
+          grep -q 'claim_owner_account' dist/parkops/licencias.html
+          grep -q 'issue_license'       dist/parkops/licencias.html
+          # Los botones de descarga apuntan a los APK que acabamos de copiar.
+          grep -q 'PARKOPS-OPERACION-v1_6_6.apk' dist/parkops/index.html
+          grep -q 'SOLVEX-LICENCIAS-v1_4_0.apk'  dist/parkops/index.html
+          printf '%s\n' '{"operacion":"1.6.6","consolaLicencias":"1.0","apkOperacion":"PARKOPS-OPERACION-v1_6_6.apk","apkLicencias":"SOLVEX-LICENCIAS-v1_4_0.apk"}' > dist/parkops/version.json
       - name: Validar cloud, licencias, usuarios y sedes
         shell: bash
         run: |
