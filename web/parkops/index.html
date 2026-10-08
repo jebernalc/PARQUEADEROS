@@ -1,0 +1,1950 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14171c">
+<meta name="mobile-web-app-capable" content="yes">
+<title>PARKOPS Operación 1.6.6</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--asfalto:#14171c;--panel:#1c2128;--panel2:#242b34;--linea:#333c48;--tinta:#eef0f3;--tinta2:#9aa5b2;
+  --ambar:#ffb300;--verde:#25d366;--rojo:#ff5a5a;--placa:#f5c518;--electro:#3fc9f5;
+  --safe-b:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--asfalto);color:var(--tinta);font-family:'Inter',system-ui,sans-serif;font-size:15px;
+  padding-bottom:calc(76px + var(--safe-b));-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit;font-size:16px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+h1,h2{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+.mono{font-family:'JetBrains Mono',monospace}
+
+header{position:sticky;top:0;z-index:30;background:var(--panel);border-bottom:3px solid var(--ambar);
+  padding:10px 14px;display:flex;align-items:center;gap:10px}
+.icono{width:24px;height:24px;border-radius:5px;flex:none;background:repeating-linear-gradient(135deg,var(--ambar) 0 5px,#14171c 5px 10px)}
+header h1{font-size:17px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header small{display:block;font-family:'Inter';font-size:11px;color:var(--tinta2);text-transform:none;letter-spacing:0}
+header .reloj{margin-left:auto;font-family:'JetBrains Mono';font-size:13px;color:var(--tinta2)}
+
+main{padding:14px;max-width:640px;margin:0 auto}
+.vista{display:none}.vista.on{display:block}
+.tarjeta{background:var(--panel);border:1px solid var(--linea);border-radius:12px;padding:16px;margin-bottom:12px}
+.tarjeta h2{font-size:16px;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.tarjeta h2 .n{margin-left:auto;font-family:'JetBrains Mono';font-size:12px;color:var(--ambar);
+  background:rgba(255,179,0,.13);padding:2px 9px;border-radius:20px}
+
+.placa{background:var(--placa);border:3px solid #0d0f12;border-radius:9px;padding:5px 8px 9px;text-align:center;box-shadow:0 4px 0 #0d0f12}
+.placa .pais{font-family:'Barlow Condensed';font-size:10px;letter-spacing:.35em;color:#0d0f12;font-weight:700}
+.placa input{width:100%;background:transparent;border:none;text-align:center;font-family:'JetBrains Mono';
+  font-weight:700;font-size:clamp(30px,9vw,40px);letter-spacing:.12em;color:#0d0f12;text-transform:uppercase}
+.placa input::placeholder{color:rgba(13,15,18,.26)}.placa input:focus{outline:none}
+.placa-wrap{position:relative;margin-bottom:14px}
+.sug{position:absolute;left:0;right:0;top:100%;margin-top:6px;z-index:20;background:var(--panel2);
+  border:1px solid var(--linea);border-radius:10px;overflow:hidden;max-height:220px;overflow-y:auto;box-shadow:0 14px 30px rgba(0,0,0,.55)}
+.sug button{display:block;width:100%;text-align:left;padding:11px 13px;border-bottom:1px solid var(--linea)}
+.sug .pl{font-family:'JetBrains Mono';font-weight:700;color:var(--ambar)}
+.sug .nm{font-size:12px;color:var(--tinta2)}
+
+label{display:block;font-family:'Barlow Condensed';text-transform:uppercase;letter-spacing:.08em;font-size:12px;
+  color:var(--tinta2);margin-bottom:5px;font-weight:600}
+.campo{margin-bottom:12px}
+input[type=text],input[type=tel],input[type=number],input[type=date],select,textarea{
+  width:100%;background:var(--panel2);border:1px solid var(--linea);border-radius:10px;padding:12px;color:var(--tinta)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ambar);box-shadow:0 0 0 3px rgba(255,179,0,.16)}
+.fila{display:flex;gap:10px}.fila>*{flex:1;min-width:0}
+
+.tipos{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px}
+.tipos button{background:var(--panel2);border:1px solid var(--linea);border-radius:10px;padding:11px 3px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;font-family:'Barlow Condensed';
+  text-transform:uppercase;font-size:12px;letter-spacing:.05em;color:var(--tinta2)}
+.tipos svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.6}
+.tipos button[aria-pressed=true]{background:rgba(255,179,0,.15);border-color:var(--ambar);color:var(--ambar)}
+
+.switch{display:flex;align-items:center;gap:11px;background:var(--panel2);border:1px solid var(--linea);
+  border-radius:10px;padding:12px;margin-bottom:12px;cursor:pointer}
+.switch input{width:22px;height:22px;flex:none;accent-color:var(--electro)}
+.switch .txt{font-size:14px}
+.switch .txt small{display:block;color:var(--tinta2);font-size:12px}
+.switch.on{border-color:var(--electro);background:rgba(63,201,245,.09)}
+.switch.on .rayo{color:var(--electro)}
+.rayo{color:var(--tinta2);flex:none}
+.rayo svg{width:22px;height:22px;fill:currentColor}
+
+.btn{display:block;width:100%;padding:16px;border-radius:11px;font-family:'Barlow Condensed';
+  text-transform:uppercase;letter-spacing:.07em;font-size:18px;font-weight:700;background:var(--ambar);color:#14171c;text-decoration:none;text-align:center}
+.btn:active{transform:translateY(1px)}
+.btn.wa{background:var(--verde);color:#06301a;display:flex;align-items:center;justify-content:center;gap:9px}
+.btn.wa svg{width:21px;height:21px;fill:currentColor}
+#rPagosApps{display:flex;flex-direction:column;gap:9px}
+#rPagosApps:not(:empty){margin-bottom:9px}
+.btn.pago{display:flex;align-items:center;justify-content:center;gap:9px}
+.btn.pago svg{width:21px;height:21px;flex:none}
+.btn.sec{background:var(--panel2);color:var(--tinta);border:1px solid var(--linea);font-size:15px;padding:12px}
+.btn.roja{background:transparent;color:var(--rojo);border:1px solid var(--rojo);font-size:14px;padding:11px}
+.btn+.btn,.fila+.btn,.btn+.fila{margin-top:9px}
+
+.auto{display:flex;align-items:center;gap:11px;background:var(--panel2);border:1px solid var(--linea);
+  border-left:4px solid var(--ambar);border-radius:10px;padding:11px 12px;width:100%;text-align:left;margin-bottom:8px}
+.auto .pl{font-family:'JetBrains Mono';font-weight:700;font-size:17px}
+.auto .meta{font-size:12px;color:var(--tinta2)}
+.auto .t{margin-left:auto;text-align:right;flex:none}
+.auto .t b{font-family:'JetBrains Mono';font-size:14px;color:var(--ambar);display:block}
+.auto .t span{font-size:11px;color:var(--tinta2)}
+.auto.mens{border-left-color:var(--verde)}
+.auto.elec{border-left-color:var(--electro)}
+.vacio{text-align:center;padding:26px 10px;color:var(--tinta2);font-size:14px}
+.vacio b{display:block;font-family:'Barlow Condensed';text-transform:uppercase;font-size:16px;color:var(--tinta);margin-bottom:4px}
+
+.recibo-num{font-family:'JetBrains Mono';font-weight:700;color:var(--ambar);font-size:13px}
+.liq{background:var(--panel2);border-radius:12px;padding:18px;text-align:center;margin:14px 0}
+.liq .tot{font-family:'JetBrains Mono';font-weight:700;font-size:clamp(34px,11vw,46px);color:var(--verde);line-height:1}
+.liq .det{font-size:12px;color:var(--tinta2);margin-top:10px;line-height:1.8;text-align:left}
+.chip{display:inline-block;font-family:'Barlow Condensed';text-transform:uppercase;font-size:11px;letter-spacing:.08em;
+  padding:3px 9px;border-radius:20px;background:rgba(37,211,102,.16);color:var(--verde)}
+.chip.am{background:rgba(255,179,0,.16);color:var(--ambar)}
+.chip.el{background:rgba(63,201,245,.16);color:var(--electro)}
+.chip.ro{background:rgba(255,90,90,.16);color:var(--rojo)}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:9px;margin-bottom:12px}
+.kpi{background:var(--panel);border:1px solid var(--linea);border-top:3px solid var(--ambar);border-radius:11px;padding:12px}
+.kpi span{font-family:'Barlow Condensed';text-transform:uppercase;font-size:11px;letter-spacing:.08em;color:var(--tinta2)}
+.kpi b{display:block;font-family:'JetBrains Mono';font-size:21px;margin-top:3px}
+.kpi.v{border-top-color:var(--verde)}.kpi.v b{color:var(--verde)}
+.kpi.e{border-top-color:var(--electro)}.kpi.e b{color:var(--electro)}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-family:'Barlow Condensed';text-transform:uppercase;font-size:11px;letter-spacing:.06em;color:var(--tinta2);
+  text-align:left;padding:7px 6px;border-bottom:1px solid var(--linea);white-space:nowrap}
+td{padding:8px 6px;border-bottom:1px solid var(--linea)}
+.num{text-align:right;font-family:'JetBrains Mono'}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+.acordeon{border:1px solid var(--linea);border-radius:12px;margin-bottom:10px;overflow:hidden;background:var(--panel)}
+.acordeon>summary{padding:15px 16px;font-family:'Barlow Condensed';text-transform:uppercase;letter-spacing:.05em;
+  font-size:16px;font-weight:600;cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
+.acordeon>summary::-webkit-details-marker{display:none}
+.acordeon>summary::after{content:'+';margin-left:auto;color:var(--ambar);font-size:20px;font-family:'JetBrains Mono'}
+.acordeon[open]>summary::after{content:'–'}
+.acordeon .cuerpo{padding:0 16px 16px}
+
+nav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--panel);border-top:1px solid var(--linea);
+  display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:var(--safe-b)}
+nav button{padding:9px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--tinta2);
+  font-family:'Barlow Condensed';text-transform:uppercase;font-size:11px;letter-spacing:.05em;font-weight:600}
+nav svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+nav button.on{color:var(--ambar)}
+.badge{position:absolute;transform:translate(15px,-4px);background:var(--ambar);color:#14171c;
+  font-family:'JetBrains Mono';font-size:10px;border-radius:9px;padding:0 5px;font-weight:700}
+
+.fondo{position:fixed;inset:0;background:rgba(8,10,13,.86);z-index:70;display:flex;align-items:flex-end;justify-content:center}
+.fondo[hidden]{display:none}
+.modal{background:var(--panel);border:1px solid var(--linea);border-radius:16px 16px 0 0;width:100%;max-width:640px;
+  max-height:92vh;overflow-y:auto;padding:18px 16px calc(18px + var(--safe-b))}
+.modal h2{font-size:17px;margin-bottom:10px}
+.previa{background:#0f1419;border:1px solid var(--linea);border-radius:10px;padding:13px;margin-bottom:14px;
+  font-family:'JetBrains Mono';font-size:12px;line-height:1.65;white-space:pre-wrap;word-break:break-word;
+  max-height:34vh;overflow-y:auto;color:#cfd6df}
+.simul{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:6px;margin-bottom:12px}
+.simul button{background:var(--panel2);border:1px solid var(--linea);border-radius:9px;padding:9px 2px;
+  font-family:'Barlow Condensed';text-transform:uppercase;font-size:12px;color:var(--tinta2)}
+.simul button.on{background:rgba(255,179,0,.15);border-color:var(--ambar);color:var(--ambar)}
+
+.aviso{position:fixed;left:50%;bottom:calc(88px + var(--safe-b));transform:translateX(-50%) translateY(14px);opacity:0;
+  background:var(--panel2);border:1px solid var(--ambar);border-left:4px solid var(--ambar);padding:12px 17px;
+  border-radius:10px;z-index:80;pointer-events:none;transition:.2s;max-width:92vw;box-shadow:0 10px 30px rgba(0,0,0,.55);font-size:14px}
+.aviso.ver{opacity:1;transform:translateX(-50%) translateY(0)}
+.aviso.ok{border-color:var(--verde);border-left-color:var(--verde)}
+.aviso.err{border-color:var(--rojo);border-left-color:var(--rojo)}
+.nota{font-size:12px;color:var(--tinta2);line-height:1.65}
+.sep{height:1px;background:var(--linea);margin:14px 0}
+.legal{background:rgba(255,179,0,.07);border:1px solid rgba(255,179,0,.3);border-radius:10px;padding:11px 13px;
+  font-size:12px;color:var(--tinta2);line-height:1.65}
+.legal b{color:var(--ambar)}
+.alerta-tope{color:var(--rojo);font-size:12px;margin-top:6px}
+.qr-bloque{text-align:center;margin-bottom:14px}
+.qr-bloque img{width:170px;height:170px;object-fit:contain;border-radius:10px;border:1px solid var(--linea);
+  background:#fff;padding:6px;display:block;margin:0 auto}
+.qr-bloque.chico img{width:120px;height:120px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIlBBUktPUFMgT3BlcmFjacOzbiIsICJzaG9ydF9uYW1lIjogIlBBUktPUFMiLCAic3RhcnRfdXJsIjogIi4iLCAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwgImJhY2tncm91bmRfY29sb3IiOiAiIzE0MTcxYyIsICJ0aGVtZV9jb2xvciI6ICIjZmZiMzAwIiwgImRlc2NyaXB0aW9uIjogIk9wZXJhY2nDs24gZGUgcGFycXVlYWRlcm9zIOKAlCBTT0xWRVggU1lTVEVNIEpCIFMuQS5TLiIsICJpY29ucyI6IFt7InNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTUzTXk1dmNtY3ZNakF3TUM5emRtY2lJSFpwWlhkQ2IzZzlJakFnTUNBMU1USWdOVEV5SWo0OGNtVmpkQ0IzYVdSMGFEMGlOVEV5SWlCb1pXbG5hSFE5SWpVeE1pSWdjbmc5SWprMklpQm1hV3hzUFNJak1UUXhOekZqSWk4K1BIUmxlSFFnZUQwaU1qVTJJaUI1UFNJek5UQWlJR1p2Ym5RdFptRnRhV3g1UFNKQmNtbGhiQ3h6WVc1ekxYTmxjbWxtSWlCbWIyNTBMWE5wZW1VOUlqTXdNQ0lnWm05dWRDMTNaV2xuYUhROUlqY3dNQ0lnWm1sc2JEMGlJMlptWWpNd01DSWdkR1Y0ZEMxaGJtTm9iM0k5SW0xcFpHUnNaU0krVUR3dmRHVjRkRDQ4TDNOMlp6ND0iLCAic2l6ZXMiOiAiNTEyeDUxMiIsICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiLCAicHVycG9zZSI6ICJhbnkifV19">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#ffb300">
+<style>:root{color-scheme:only dark}html,body{background:#14171c!important}</style>
+</head>
+<body>
+
+<header>
+  <div class="icono" aria-hidden="true"></div>
+  <div style="min-width:0"><h1 id="hNombre">Parqueadero</h1><small id="hOperario">Operario</small></div>
+  <span class="reloj" id="reloj">--:--</span>
+</header>
+
+<main>
+
+<!-- ══════ INGRESO ══════ -->
+<section class="vista on" id="v-ingreso">
+  <div class="tarjeta">
+    <h2>Registrar ingreso <span class="n" id="proxRecibo"></span></h2>
+    <div class="placa-wrap">
+      <div class="placa"><div class="pais">Colombia</div>
+        <input id="placa" maxlength="8" placeholder="ABC123" autocomplete="off" spellcheck="false" aria-label="Placa"></div>
+      <div class="sug" id="sug" hidden></div>
+    </div>
+    <div class="tipos" id="tipos" role="group" aria-label="Tipo de vehículo"></div>
+
+    <label class="switch" id="swElectrico">
+      <input type="checkbox" id="chkElectrico">
+      <span class="rayo"><svg viewBox="0 0 24 24"><path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5z"/></svg></span>
+      <span class="txt">Conecta a recarga eléctrica<small id="txtRecarga"></small></span>
+    </label>
+
+    <div class="campo"><label for="celular">Celular para el recibo</label>
+      <input id="celular" type="tel" inputmode="numeric" placeholder="300 000 0000" autocomplete="off"></div>
+    <div class="fila">
+      <div class="campo"><label for="nombre">Cliente</label><input id="nombre" type="text" placeholder="Opcional"></div>
+      <div class="campo"><label for="obs">Nota</label><input id="obs" type="text" placeholder="Casco, puesto…"></div>
+    </div>
+    <div id="estadoCliente"></div>
+
+    <button class="btn wa" id="btnEntrada">
+      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 00-8.7 15l-1.3 5 5.1-1.3A10 10 0 1012 2zm5.6 14.1c-.2.7-1.4 1.3-1.9 1.3-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5-4.5-.2-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.4.7-.4h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.2.3 0 .5.2.3.8 1.3 1.7 2.1 1.1 1 2 1.3 2.3 1.4.2.1.4.1.5-.1l.8-.9c.2-.2.3-.2.5-.1l2 .9c.2.1.4.2.4.3.1.2.1.7-.1 1.3z"/></svg>
+      Entrada y enviar recibo</button>
+    <button class="btn sec" id="btnEntradaSola">Entrada sin enviar recibo</button>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Hoy</h2>
+    <div class="kpis">
+      <div class="kpi"><span>En patio</span><b id="kPatio">0</b></div>
+      <div class="kpi"><span>Salidas</span><b id="kSalidas">0</b></div>
+      <div class="kpi v"><span>Recaudo</span><b id="kRecaudo">$0</b></div>
+      <div class="kpi e"><span>Recarga</span><b id="kElectro">$0</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ COBRAR ══════ -->
+<section class="vista" id="v-cobrar">
+  <div class="tarjeta">
+    <h2>Liquidar salida</h2>
+    <div class="campo"><label for="busca">Placa o número de recibo</label>
+      <input id="busca" type="text" placeholder="ABC123  ·  1042" autocomplete="off" spellcheck="false"></div>
+    <div id="resultados"></div>
+  </div>
+  <div id="panelLiq"></div>
+</section>
+
+<!-- ══════ PATIO ══════ -->
+<section class="vista" id="v-patio">
+  <div class="tarjeta">
+    <h2>En patio <span class="n" id="nPatio">0</span></h2>
+    <div class="campo"><input id="buscaPatio" type="text" placeholder="Filtrar por placa…" autocomplete="off"></div>
+    <div id="patio"></div>
+  </div>
+</section>
+
+<!-- ══════ CAJA ══════ -->
+<section class="vista" id="v-caja">
+  <div class="tarjeta">
+    <h2>Cierre de caja</h2>
+    <div class="fila">
+      <div class="campo"><label for="rDesde">Desde</label><input id="rDesde" type="date"></div>
+      <div class="campo"><label for="rHasta">Hasta</label><input id="rHasta" type="date"></div>
+    </div>
+    <div class="kpis" id="kpisCaja"></div>
+    <div class="sep"></div>
+    <div id="porMedio"></div>
+    <div class="sep"></div>
+    <div class="scroll"><table>
+      <thead><tr><th>Recibo</th><th>Concepto</th><th>Placa</th><th class="num">Valor</th><th>Pago</th></tr></thead>
+      <tbody id="tablaCaja"></tbody></table></div>
+    <button class="btn sec" id="btnCSV" style="margin-top:12px">Descargar CSV</button>
+    <button class="btn wa" id="btnCierreWA">Enviar cierre por WhatsApp</button>
+  </div>
+</section>
+
+<!-- ══════ AJUSTES ══════ -->
+<section class="vista" id="v-ajustes">
+
+  <details class="acordeon" open>
+    <summary>Mensualidades</summary>
+    <div class="cuerpo">
+      <p class="nota" style="margin-bottom:12px">Aplica a carro, moto, bicicleta y patineta. Mientras esté vigente,
+        la salida liquida en cero y el recibo lo indica.</p>
+      <div class="fila">
+        <div class="campo"><label for="mPlaca">Placa</label><input id="mPlaca" type="text" maxlength="8"></div>
+        <div class="campo"><label for="mTipo">Vehículo</label><select id="mTipo"></select></div>
+      </div>
+      <div class="fila">
+        <div class="campo"><label for="mNombre">Titular</label><input id="mNombre" type="text"></div>
+        <div class="campo"><label for="mCel">Celular</label><input id="mCel" type="tel" inputmode="numeric"></div>
+      </div>
+      <div class="fila">
+        <div class="campo"><label for="mDesde">Desde</label><input id="mDesde" type="date"></div>
+        <div class="campo"><label for="mHasta">Hasta</label><input id="mHasta" type="date"></div>
+      </div>
+      <label class="switch" id="swMensRec">
+        <input type="checkbox" id="mIncluyeRec">
+        <span class="rayo"><svg viewBox="0 0 24 24"><path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5z"/></svg></span>
+        <span class="txt">Incluye recarga eléctrica ilimitada<small id="mTxtRec"></small></span>
+      </label>
+      <div class="fila">
+        <div class="campo"><label for="mValor">Valor a cobrar</label><input id="mValor" type="number" min="0" step="1000"></div>
+        <div class="campo"><label for="mMedio">Medio de pago</label><select id="mMedio"></select></div>
+      </div>
+      <button class="btn" id="btnMensGuardar">Registrar mensualidad</button>
+      <button class="btn wa" id="btnMensRecibo">Registrar y enviar recibo</button>
+      <div class="sep"></div>
+      <div class="scroll"><table>
+        <thead><tr><th>Placa</th><th>Titular</th><th>Vence</th><th class="num">Valor</th><th></th></tr></thead>
+        <tbody id="tablaMens"></tbody></table></div>
+    </div>
+  </details>
+
+  <details class="acordeon">
+    <summary>Recarga de vehículo eléctrico</summary>
+    <div class="cuerpo">
+      <div class="campo"><label for="eModo">Cómo se cobra</label>
+        <select id="eModo">
+          <option value="kwh">Por energía entregada (kWh)</option>
+          <option value="minuto">Por minuto conectado</option>
+          <option value="sesion">Tarifa fija por sesión</option>
+        </select></div>
+      <div class="fila">
+        <div class="campo"><label for="eValor">Valor</label><input id="eValor" type="number" min="0" step="50"></div>
+        <div class="campo"><label for="eConexion">Cargo de conexión</label><input id="eConexion" type="number" min="0" step="500"></div>
+      </div>
+      <div class="campo"><label for="eMes">Recarga ilimitada en la mensualidad</label>
+        <input id="eMes" type="number" min="0" step="1000"></div>
+      <p class="nota">El cargo de conexión se suma una sola vez por sesión. Déjalo en cero si no lo cobras.</p>
+      <button class="btn sec" id="btnRecarga" style="margin-top:12px">Guardar recarga</button>
+    </div>
+  </details>
+
+  <details class="acordeon">
+    <summary>Tarifas de parqueo</summary>
+    <div class="cuerpo">
+      <p class="legal" style="margin-bottom:12px"><b>Cobro por minuto.</b> En Colombia no hay tarifa nacional:
+        cada municipio expide su decreto de topes y la Ley 1480 de 2011 obliga a tener el tarifario visible antes
+        de que entre el vehículo. Los topes cargados son los de Bogotá 2026 (Decreto 026 de 2026).</p>
+      <div class="scroll"><table>
+        <thead><tr><th>Vehículo</th><th class="num">$ / min</th><th class="num">Tope día</th><th class="num">Mensualidad</th></tr></thead>
+        <tbody id="tablaTarifas"></tbody></table></div>
+      <div id="alertasTope"></div>
+      <div class="sep"></div>
+      <div class="fila">
+        <div class="campo"><label for="rGracia">Minutos de gracia</label><input id="rGracia" type="number" min="0"></div>
+        <div class="campo"><label for="rRedondeo">Redondear a</label>
+          <select id="rRedondeo"><option value="1">Sin redondeo</option><option value="50">$50</option>
+            <option value="100">$100</option><option value="500">$500</option></select></div>
+      </div>
+      <label class="nota" style="display:flex;gap:9px;align-items:flex-start;text-transform:none;font-size:13px">
+        <input type="checkbox" id="rSelloOro" style="width:20px;height:20px;flex:none;margin-top:1px">
+        <span>Parqueadero con Sello Oro (permite el tope superior en Bogotá)</span></label>
+      <button class="btn sec" id="btnReglas" style="margin-top:12px">Guardar reglas</button>
+    </div>
+  </details>
+
+  <details class="acordeon">
+    <summary>Medios de pago del recibo</summary>
+    <div class="cuerpo">
+      <p class="nota" style="margin-bottom:12px">Lo que actives aparece en el recibo de WhatsApp con su enlace de pago.</p>
+      <div id="mediosPago"></div>
+    </div>
+  </details>
+
+  <details class="acordeon">
+    <summary>Datos del parqueadero</summary>
+    <div class="cuerpo">
+      <div class="campo"><label for="aNombre">Nombre</label><input id="aNombre" type="text"></div>
+      <div class="fila">
+        <div class="campo"><label for="aNit">NIT</label><input id="aNit" type="text"></div>
+        <div class="campo"><label for="aTel">Teléfono</label><input id="aTel" type="tel"></div></div>
+      <div class="campo"><label for="aDir">Dirección</label><input id="aDir" type="text"></div>
+      <div class="fila">
+        <div class="campo"><label for="aOperario">Operario</label><input id="aOperario" type="text"></div>
+        <div class="campo"><label for="aPrefijo">Prefijo recibo</label><input id="aPrefijo" type="text" maxlength="6"></div></div>
+      <div class="campo"><label for="aConsec">Próximo consecutivo</label><input id="aConsec" type="number" min="1"></div>
+      <button class="btn sec" id="btnDatos">Guardar datos</button>
+    </div>
+  </details>
+
+  <details class="acordeon">
+    <summary>Plantillas del recibo</summary>
+    <div class="cuerpo">
+      <div class="campo"><label for="pIngreso">Recibo de ingreso</label><textarea id="pIngreso" rows="9"></textarea></div>
+      <div class="campo"><label for="pPago">Recibo de pago</label><textarea id="pPago" rows="11"></textarea></div>
+      <p class="nota">Etiquetas: {parqueadero} {nit} {direccion} {telefono} {recibo} {placa} {vehiculo} {cliente}
+        {entrada} {salida} {tiempo} {minutos} {tarifa} {liquidacion} {valor} {medios} {operario} {fecha}</p>
+      <button class="btn sec" id="btnPlantillas" style="margin-top:10px">Guardar plantillas</button>
+      <button class="btn sec" id="btnPlantillasBase">Volver a las de fábrica</button>
+    </div>
+  </details>
+
+  <details class="acordeon">
+    <summary>Respaldo</summary>
+    <div class="cuerpo">
+      <button class="btn sec" id="btnExportar">Descargar respaldo</button>
+      <button class="btn sec" id="btnImportar">Restaurar respaldo</button>
+      <input type="file" id="fileRespaldo" accept="application/json" hidden>
+      <div class="sep"></div>
+      <button class="btn roja" id="btnBorrar">Borrar todos los datos</button>
+      <p class="nota" style="margin-top:10px" id="notaAlmacen"></p>
+    </div>
+  </details>
+</section>
+</main>
+
+<nav>
+  <button data-v="ingreso" class="on"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Ingreso</button>
+  <button data-v="cobrar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Cobrar</button>
+  <button data-v="patio"><svg viewBox="0 0 24 24"><path d="M3 13l2-5a2 2 0 012-1.4h10A2 2 0 0119 8l2 5v5h-3v-2H6v2H3z"/><circle cx="7.5" cy="15.5" r="1.2"/><circle cx="16.5" cy="15.5" r="1.2"/></svg><span id="badgePatio"></span>Patio</button>
+  <button data-v="caja"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M8 15h3"/></svg>Caja</button>
+  <button data-v="ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8 2 2 0 11-2.8 2.8 1.6 1.6 0 00-2.7 1.1 2 2 0 11-4 0 1.6 1.6 0 00-2.8-1.1 2 2 0 11-2.8-2.8A1.6 1.6 0 003.7 15a2 2 0 01-1.8 1.2 2 2 0 010-4A1.6 1.6 0 003.7 9a1.6 1.6 0 00-.4-1.8 2 2 0 112.8-2.8A1.6 1.6 0 009 4.7a2 2 0 011.2-1.8 2 2 0 014 0A1.6 1.6 0 0015 4.7a1.6 1.6 0 001.8-.4 2 2 0 112.8 2.8 1.6 1.6 0 00-.3 1.8 1.6 1.6 0 001.5 1 2 2 0 010 4 1.6 1.6 0 00-1.4 1z"/></svg>Ajustes</button>
+</nav>
+
+<div class="fondo" id="fondoRecibo" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="rTitulo">
+    <h2 id="rTitulo">Recibo</h2>
+    <p class="nota" id="rDestino" style="margin-bottom:10px"></p>
+    <div class="previa" id="rTexto"></div>
+    <div id="rPagosApps"></div>
+    <p class="nota" id="rPagosNota" hidden style="margin:-4px 0 9px;text-align:center">Cada botón copia el valor y abre la app respectiva: pégalo y confirma con tu clave o huella.</p>
+    <a class="btn wa" id="rWA" href="#" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 00-8.7 15l-1.3 5 5.1-1.3A10 10 0 1012 2zm5.6 14.1c-.2.7-1.4 1.3-1.9 1.3-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5-4.5-.2-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.4.7-.4h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5-.3.3c-.1.1-.2.3 0 .5.2.3.8 1.3 1.7 2.1 1.1 1 2 1.3 2.3 1.4.2.1.4.1.5-.1l.8-.9c.2-.2.3-.2.5-.1l2 .9c.2.1.4.2.4.3.1.2.1.7-.1 1.3z"/></svg>
+      Abrir WhatsApp (recibo)</a>
+    <button class="btn sec" id="rCompartir">Compartir por otra app</button>
+    <button class="btn sec" id="rCopiar">Copiar el texto del recibo</button>
+    <button class="btn sec" id="rCerrar">Cerrar</button>
+  </div>
+</div>
+
+<div class="aviso" id="aviso" role="status" aria-live="polite"></div>
+
+<script>
+/* ═══════ ALMACENAMIENTO ═══════ */
+const Store=(()=>{let ok=true,mem={};
+  try{localStorage.setItem('_t','1');localStorage.removeItem('_t')}catch(e){ok=false}
+  return{get:(k,d)=>{try{const v=ok?localStorage.getItem(k):mem[k];return v?JSON.parse(v):d}catch(e){return d}},
+    set:(k,v)=>{const s=JSON.stringify(v);try{ok?localStorage.setItem(k,s):mem[k]=s}catch(e){mem[k]=s}},
+    del:k=>{try{ok?localStorage.removeItem(k):delete mem[k]}catch(e){}},persistente:ok}})();
+const K={cfg:'pqe_cfg',tar:'pqe_tarifas',cli:'pqe_clientes',ing:'pqe_ingresos',men:'pqe_mens'};
+
+/* ═══════ CATÁLOGOS ═══════ */
+const TIPOS=[
+ {id:'carro',n:'Carro',etq:'Automóvil, campero o camioneta',
+  svg:'<path d="M3 13l2-5a2 2 0 012-1.4h10A2 2 0 0119 8l2 5v5h-3v-2H6v2H3z"/><circle cx="7.5" cy="15.5" r="1.3"/><circle cx="16.5" cy="15.5" r="1.3"/>'},
+ {id:'moto',n:'Moto',etq:'Motocicleta',
+  svg:'<circle cx="5" cy="16" r="3"/><circle cx="19" cy="16" r="3"/><path d="M5 16l4-6h5l3 6M12 10l-1-3h3"/>'},
+ {id:'bicicleta',n:'Bici',etq:'Bicicleta',
+  svg:'<circle cx="5.5" cy="16" r="3.5"/><circle cx="18.5" cy="16" r="3.5"/><path d="M5.5 16l4-8h4l5 8M9.5 8h5M12 16l2.5-8"/>'},
+ {id:'patineta',n:'Patineta',etq:'Patineta eléctrica',
+  svg:'<circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M4 14h13l3-9M13 5h5"/>'}];
+
+/* Topes máximos por minuto · Bogotá, Decreto 026 de 2026 */
+const TOPES={carro:{normal:230,oro:253},moto:{normal:161,oro:177},bicicleta:{normal:10,oro:0},patineta:{normal:10,oro:10}};
+const TARIFAS_BASE={carro:{min:200,dia:22000,mes:180000},moto:{min:140,dia:11000,mes:90000},
+  bicicleta:{min:10,dia:3000,mes:35000},patineta:{min:10,dia:3000,mes:35000}};
+const MEDIOS_BASE=[
+  {id:'efectivo',n:'Efectivo en caja',on:true,dato:'',link:''},
+  {id:'nequi',n:'Nequi',on:true,dato:'',link:'',app:'com.nequi.MobileApp',marca:'#6a1b9a',txt:'#fff'},
+  {id:'daviplata',n:'Daviplata',on:true,dato:'',link:'',app:'com.davivienda.daviplataapp',marca:'#d0021b',txt:'#fff'},
+  {id:'pse',n:'PSE / botón de pago',on:false,dato:'',link:''},
+  {id:'transferencia',n:'Transferencia bancaria',on:false,dato:'',link:''},
+  {id:'qr',n:'Código QR Bancolombia',on:false,dato:'',link:'',app:'co.com.bancolombia.personas.superapp',marca:'#ffd100',txt:'#1a1a1a'}];
+
+const P_INGRESO=
+`🅿️ *{parqueadero}*
+{direccion} · Tel {telefono}
+NIT {nit}
+
+*RECIBO N° {recibo}*
+COMPROBANTE DE INGRESO
+
+Placa: *{placa}*
+Vehículo: {vehiculo}
+Ingreso: {entrada}
+Tarifa: {tarifa}
+
+Conserve este recibo. Al retirar el vehículo le enviamos la liquidación por este mismo chat.
+
+{medios}
+
+Atendió: {operario}
+Tarifas a la vista según Ley 1480 de 2011.`;
+
+const P_PAGO=
+`🅿️ *{parqueadero}*
+{direccion} · Tel {telefono}
+NIT {nit}
+
+*RECIBO N° {recibo}*
+LIQUIDACIÓN Y PAGO
+
+Placa: *{placa}*
+Vehículo: {vehiculo}
+Ingreso: {entrada}
+Salida: {salida}
+Permanencia: {tiempo} ({minutos} min)
+
+{liquidacion}
+
+*TOTAL A PAGAR: {valor}*
+
+{medios}
+
+Atendió: {operario} · {fecha}
+Gracias por su visita.`;
+
+const RECARGA_BASE={modo:'kwh',valor:1300,conexion:0,mes:60000};
+const CFG_BASE={nombre:'Parqueadero Central',nit:'',direccion:'',telefono:'',operario:'Operario',
+  prefijo:'PQ-',consecutivo:1001,gracia:0,redondeo:50,selloOro:false,
+  recarga:Object.assign({},RECARGA_BASE),medios:JSON.parse(JSON.stringify(MEDIOS_BASE)),
+  pIngreso:P_INGRESO,pPago:P_PAGO};
+
+/* ═══════ ESTADO ═══════ */
+let cfg=Object.assign({},CFG_BASE,Store.get(K.cfg,{}));
+cfg.recarga=Object.assign({},RECARGA_BASE,cfg.recarga||{});
+if(!cfg.medios||!cfg.medios.length)cfg.medios=JSON.parse(JSON.stringify(MEDIOS_BASE));
+let tarifas=Object.assign({},TARIFAS_BASE,Store.get(K.tar,{}));
+let clientes=Store.get(K.cli,[]);
+let ingresos=Store.get(K.ing,[]);
+let mensualidades=Store.get(K.men,[]);
+let tipoSel='carro',electricoSel=false;
+
+const sCfg=()=>Store.set(K.cfg,cfg),sTar=()=>Store.set(K.tar,tarifas),sCli=()=>Store.set(K.cli,clientes),
+      sIng=()=>Store.set(K.ing,ingresos),sMen=()=>Store.set(K.men,mensualidades);
+
+/* ═══════ UTILIDADES ═══════ */
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const pesos=n=>'$'+Math.round(n||0).toLocaleString('es-CO');
+const norm=s=>(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+const hoy=()=>new Date().toISOString().slice(0,10);
+const hhmm=t=>new Date(t).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+const ddmm=t=>new Date(t).toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit',year:'numeric'});
+const dFecha=d=>d?ddmm(d+'T12:00'):'—';
+const fechaHora=t=>`${ddmm(t)} ${hhmm(t)}`;
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const dia=t=>new Date(t).toISOString().slice(0,10);
+function dur(ms){const m=Math.max(0,Math.floor(ms/60000)),d=Math.floor(m/1440),h=Math.floor(m%1440/60),i=m%60;
+  return d?`${d}d ${h}h ${i}m`:h?`${h}h ${i}m`:`${i}m`}
+let tAv;function avisar(t,c){const a=$('#aviso');a.textContent=t;a.className='aviso ver '+(c||'');
+  clearTimeout(tAv);tAv=setTimeout(()=>a.className='aviso '+(c||''),2900)}
+function celular(c){const d=(c||'').replace(/\D/g,'');return d?(d.length===10?'57'+d:d):''}
+function nuevoRecibo(){const n=cfg.prefijo+String(cfg.consecutivo).padStart(4,'0');cfg.consecutivo++;sCfg();return n}
+
+/* ═══════ MENSUALIDADES ═══════ */
+function mensVigente(placa){
+  return mensualidades.filter(m=>m.placa===placa&&m.hasta>=hoy())
+    .sort((a,b)=>b.hasta.localeCompare(a.hasta))[0]||null;
+}
+
+/* ═══════ MOTOR DE COBRO ═══════ */
+function costoRecarga(minutosConectado,kwh){
+  const r=cfg.recarga,l=[];let v=+r.conexion||0;
+  if(v)l.push(`Conexión: ${pesos(v)}`);
+  if(r.modo==='kwh'){const k=+kwh||0;v+=k*r.valor;l.push(`Recarga: ${k} kWh × ${pesos(r.valor)} = ${pesos(k*r.valor)}`)}
+  else if(r.modo==='minuto'){const m=Math.max(1,minutosConectado);v+=m*r.valor;
+    l.push(`Recarga: ${m} min × ${pesos(r.valor)} = ${pesos(m*r.valor)}`)}
+  else{v+=+r.valor||0;l.push(`Recarga: sesión ${pesos(r.valor)}`)}
+  return{valor:v,lineas:l};
+}
+function liquidar(entrada,salida,tipo,placa,electrico,kwh){
+  const t=tarifas[tipo]||tarifas.carro,min=Math.max(0,Math.round((salida-entrada)/60000));
+  const mens=mensVigente(placa),lineas=[];
+  let parqueo=0,recarga=0;
+
+  if(mens){lineas.push(`Mensualidad vigente hasta ${dFecha(mens.hasta)} — parqueo sin costo`)}
+  else if(cfg.gracia&&min<=cfg.gracia){lineas.push(`${min} min · dentro de los ${cfg.gracia} minutos de gracia`)}
+  else{
+    const cob=Math.max(1,min),dias=Math.floor(cob/1440),resto=cob%1440;
+    if(dias){parqueo+=dias*t.dia;lineas.push(`${dias} día(s) × ${pesos(t.dia)} = ${pesos(dias*t.dia)}`)}
+    if(resto){const pm=resto*t.min;
+      if(pm>t.dia){parqueo+=t.dia;lineas.push(`${resto} min × ${pesos(t.min)} = ${pesos(pm)}`);
+        lineas.push(`Tope de día pleno: ${pesos(t.dia)}`)}
+      else{parqueo+=pm;lineas.push(`${resto} min × ${pesos(t.min)} = ${pesos(pm)}`)}}
+  }
+
+  if(electrico){
+    if(mens&&mens.incluyeRecarga)lineas.push('Recarga eléctrica incluida en la mensualidad');
+    else{const r=costoRecarga(min,kwh);recarga=r.valor;r.lineas.forEach(l=>lineas.push(l))}
+  }
+
+  const rd=Math.max(1,+cfg.redondeo||1),bruto=parqueo+recarga;
+  const total=Math.ceil(bruto/rd)*rd;
+  if(rd>1&&total!==bruto)lineas.push(`Redondeo a ${pesos(rd)}: ${pesos(total)}`);
+  return{total,parqueo,recarga,min,lineas,mens:!!mens};
+}
+function textoTarifa(tipo,electrico){
+  const t=tarifas[tipo]||tarifas.carro,r=cfg.recarga;
+  let s=`${pesos(t.min)} por minuto · tope día ${pesos(t.dia)}`;
+  if(cfg.gracia)s+=` · primeros ${cfg.gracia} min sin costo`;
+  if(electrico)s+=`\nRecarga eléctrica: `+(r.modo==='kwh'?`${pesos(r.valor)} por kWh`
+    :r.modo==='minuto'?`${pesos(r.valor)} por minuto conectado`:`${pesos(r.valor)} por sesión`)+
+    ((+r.conexion)?` + conexión ${pesos(r.conexion)}`:'');
+  return s;
+}
+
+/* ═══════ RECIBOS ═══════ */
+function bloqueMedios(valor){
+  const act=cfg.medios.filter(m=>m.on);if(!act.length)return'';
+  const l=['*MEDIOS DE PAGO*'];
+  act.forEach(m=>{l.push('• '+m.n+(m.dato?': '+m.dato:''));if(m.link)l.push('  '+m.link)});
+  if(valor>0)l.push(`Valor a pagar: *${pesos(valor)}*`);
+  return l.join('\n');
+}
+const armar=(p,d)=>p.replace(/{(\w+)}/g,(_,k)=>d[k]!==undefined?d[k]:'');
+function datosRecibo(reg,liq){
+  const t=TIPOS.find(x=>x.id===reg.tipo);
+  return{parqueadero:cfg.nombre,nit:cfg.nit||'—',direccion:cfg.direccion||'',telefono:cfg.telefono||'',
+    recibo:reg.recibo,placa:reg.placa,vehiculo:(t?t.etq:reg.tipo)+(reg.electrico?' · eléctrico':''),
+    cliente:reg.nombre||'—',entrada:fechaHora(reg.entrada),salida:reg.salida?fechaHora(reg.salida):'',
+    tiempo:liq?dur(liq.min*60000):'',minutos:liq?liq.min:'',tarifa:textoTarifa(reg.tipo,reg.electrico),
+    liquidacion:liq?liq.lineas.map(x=>'· '+x).join('\n'):'',valor:liq?pesos(liq.total):'',
+    medios:bloqueMedios(liq?liq.total:0),operario:cfg.operario,fecha:fechaHora(Date.now())};
+}
+let reciboActual='',reciboMonto=0;
+function iconoTarjeta(){
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="6" width="18" height="12" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
+}
+function renderPagosApps(monto){
+  const cont=$('#rPagosApps');
+  const activos=(monto>0&&window.AndroidPagos&&window.AndroidPagos.pagar)
+    ?cfg.medios.filter(m=>m.on&&m.app):[];
+  cont.innerHTML=activos.map(m=>`<button class="btn pago" data-medio="${m.id}" style="background:${m.marca||'#333c48'};color:${m.txt||'#fff'}">
+    ${iconoTarjeta()}Pagar ${pesos(monto)} con ${m.n}</button>`).join('');
+  $('#rPagosNota').hidden=!activos.length;
+  cont.querySelectorAll('button[data-medio]').forEach(b=>b.addEventListener('click',()=>{
+    const medio=cfg.medios.find(x=>x.id===b.dataset.medio);
+    if(medio&&medio.app)window.AndroidPagos.pagar(String(Math.round(monto)),medio.dato||'',medio.app);
+  }));
+}
+function abrirWA(cel,msg,titulo,monto){
+  reciboActual=msg;reciboMonto=monto||0;const n=celular(cel);
+  $('#rTitulo').textContent=titulo||'Recibo';
+  $('#rDestino').innerHTML=n?`Se abre el chat de <b style="color:var(--verde)">+${n}</b>`
+    :'Sin número guardado: WhatsApp te deja escoger el contacto.';
+  $('#rTexto').textContent=msg;
+  $('#rWA').href=`https://wa.me/${n}?text=${encodeURIComponent(msg)}`;
+  $('#rCompartir').hidden=!navigator.share;
+  renderPagosApps(reciboMonto);
+  $('#fondoRecibo').hidden=false;
+}
+$('#rCerrar').addEventListener('click',()=>$('#fondoRecibo').hidden=true);
+$('#fondoRecibo').addEventListener('click',e=>{if(e.target.id==='fondoRecibo')$('#fondoRecibo').hidden=true});
+$('#rWA').addEventListener('click',()=>setTimeout(()=>$('#fondoRecibo').hidden=true,600));
+$('#rCompartir').addEventListener('click',async()=>{
+  try{await navigator.share({text:reciboActual});$('#fondoRecibo').hidden=true}
+  catch(e){avisar('No se pudo abrir el menú de compartir','err')}});
+$('#rCopiar').addEventListener('click',async()=>{
+  try{await navigator.clipboard.writeText(reciboActual)}
+  catch(e){const ta=document.createElement('textarea');ta.value=reciboActual;document.body.appendChild(ta);
+    ta.select();document.execCommand('copy');ta.remove()}
+  avisar('Recibo copiado. Pégalo en WhatsApp.','ok')});
+
+/* ═══════ NAVEGACIÓN ═══════ */
+$$('nav button').forEach(b=>b.addEventListener('click',()=>{
+  $$('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  $$('.vista').forEach(v=>v.classList.toggle('on',v.id==='v-'+b.dataset.v));
+  const v=b.dataset.v;
+  if(v==='patio')pintarPatio();
+  if(v==='caja')pintarCaja();
+  if(v==='ajustes'){pintarTarifas();pintarMedios();pintarMens();pintarRecarga()}
+  if(v==='cobrar')setTimeout(()=>$('#busca').focus(),120);
+  window.scrollTo(0,0)}));
+const irA=v=>$(`nav button[data-v="${v}"]`).click();
+
+/* ═══════ INGRESO ═══════ */
+function pintarTipos(){
+  $('#tipos').innerHTML=TIPOS.map(t=>`<button type="button" data-t="${t.id}" aria-pressed="${t.id===tipoSel}">
+    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">${t.svg}</svg>${t.n}</button>`).join('');
+  $$('#tipos button').forEach(b=>b.addEventListener('click',()=>{tipoSel=b.dataset.t;pintarTipos()}));
+  $('#mTipo').innerHTML=TIPOS.map(t=>`<option value="${t.id}">${t.n}</option>`).join('');
+  $('#txtRecarga').textContent=textoTarifa(tipoSel,true).split('\n')[1]||'';
+}
+$('#chkElectrico').addEventListener('change',e=>{
+  electricoSel=e.target.checked;$('#swElectrico').classList.toggle('on',electricoSel)});
+
+const inPlaca=$('#placa'),cajaSug=$('#sug');
+inPlaca.addEventListener('input',()=>{
+  inPlaca.value=norm(inPlaca.value);const q=inPlaca.value;$('#estadoCliente').innerHTML='';
+  if(q.length<2){cajaSug.hidden=true;return}
+  const hits=clientes.filter(c=>c.placa.startsWith(q)).slice(0,6);
+  if(!hits.length){cajaSug.hidden=true;return}
+  cajaSug.innerHTML=hits.map(c=>{const m=mensVigente(c.placa);
+    return `<button type="button" data-p="${c.placa}"><span class="pl">${c.placa}</span>
+    <span class="nm">${c.nombre||'Sin nombre'}${m?' · mensualidad activa':''}</span></button>`}).join('');
+  cajaSug.hidden=false;
+  cajaSug.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{cargarCliente(b.dataset.p);cajaSug.hidden=true}))});
+inPlaca.addEventListener('blur',()=>setTimeout(()=>cajaSug.hidden=true,180));
+inPlaca.addEventListener('keydown',e=>{if(e.key==='Enter'){cajaSug.hidden=true;$('#celular').focus()}});
+function cargarCliente(placa){
+  const c=clientes.find(x=>x.placa===placa);if(!c)return;
+  inPlaca.value=c.placa;$('#nombre').value=c.nombre||'';$('#celular').value=c.celular||'';
+  if(c.tipo){tipoSel=c.tipo;pintarTipos()}
+  const m=mensVigente(placa);
+  $('#estadoCliente').innerHTML=m?`<p style="margin-bottom:12px"><span class="chip">Mensualidad hasta ${dFecha(m.hasta)}</span>
+    ${m.incluyeRecarga?' <span class="chip el">Recarga incluida</span>':''}</p>`:'';
+}
+function registrarEntrada(enviar){
+  const placa=norm(inPlaca.value);
+  if(placa.length<3){avisar('Escribe la placa','err');inPlaca.focus();return}
+  if(ingresos.some(i=>i.placa===placa&&!i.salida)){avisar(`${placa} ya está en el patio`,'err');return}
+  const cel=$('#celular').value.trim();
+  const reg={id:uid(),recibo:nuevoRecibo(),placa,tipo:tipoSel,electrico:electricoSel,kwh:0,
+    nombre:$('#nombre').value.trim(),celular:cel,obs:$('#obs').value.trim(),
+    entrada:Date.now(),salida:null,valor:null,valorParqueo:null,valorRecarga:null,medio:null,operario:cfg.operario};
+  ingresos.unshift(reg);sIng();
+  if(cel||reg.nombre){
+    const i=clientes.findIndex(c=>c.placa===placa);
+    if(i>=0)Object.assign(clientes[i],{nombre:reg.nombre||clientes[i].nombre,celular:cel||clientes[i].celular,tipo:tipoSel});
+    else clientes.push({placa,nombre:reg.nombre,celular:cel,tipo:tipoSel});
+    sCli()}
+  if(enviar)abrirWA(reg.celular,armar(cfg.pIngreso,datosRecibo(reg,null)),`Recibo de ingreso ${reg.recibo}`);
+  ['placa','nombre','celular','obs'].forEach(id=>$('#'+id).value='');
+  $('#chkElectrico').checked=false;electricoSel=false;$('#swElectrico').classList.remove('on');
+  $('#estadoCliente').innerHTML='';
+  avisar(`Ingreso ${reg.recibo} · ${placa}`,'ok');refrescar();inPlaca.focus();
+}
+$('#btnEntrada').addEventListener('click',()=>registrarEntrada(true));
+$('#btnEntradaSola').addEventListener('click',()=>registrarEntrada(false));
+
+/* ═══════ COBRAR ═══════ */
+$('#busca').addEventListener('input',buscar);
+function buscar(){
+  const q=$('#busca').value.trim(),cont=$('#resultados');
+  if(q.length<2){cont.innerHTML='';$('#panelLiq').innerHTML='';return}
+  const qn=norm(q),hits=ingresos.filter(i=>!i.salida&&(i.placa.includes(qn)||norm(i.recibo).includes(qn)));
+  if(!hits.length){
+    const c=ingresos.find(i=>i.salida&&(i.placa.includes(qn)||norm(i.recibo).includes(qn)));
+    cont.innerHTML=c?`<div class="vacio"><b>Ya salió</b>Recibo ${c.recibo} · ${c.placa} · pagó ${pesos(c.valor)} el ${fechaHora(c.salida)}</div>`
+      :`<div class="vacio"><b>Sin resultados</b>Ninguna placa ni recibo en patio coincide.</div>`;
+    $('#panelLiq').innerHTML='';return}
+  if(hits.length===1){cont.innerHTML='';mostrarLiquidacion(hits[0].id);return}
+  cont.innerHTML=hits.map(tarjetaAuto).join('');
+  cont.querySelectorAll('.auto').forEach(b=>b.addEventListener('click',()=>mostrarLiquidacion(b.dataset.id)));
+  $('#panelLiq').innerHTML='';
+}
+function tarjetaAuto(i){
+  const t=TIPOS.find(x=>x.id===i.tipo),m=mensVigente(i.placa);
+  return `<button class="auto ${i.electrico?'elec':m?'mens':''}" data-id="${i.id}">
+    <div style="min-width:0"><div class="pl">${i.placa}${i.electrico?' ⚡':''}</div>
+      <div class="meta"><span class="recibo-num">${i.recibo}</span> · ${t?t.n:i.tipo}${m?' · mensualidad':''}</div></div>
+    <div class="t"><b>${dur(Date.now()-i.entrada)}</b><span>${hhmm(i.entrada)}</span></div></button>`;
+}
+function mostrarLiquidacion(id,simMin){
+  const reg=ingresos.find(i=>i.id===id);if(!reg)return;
+  const esMens=simMin==='mes';
+  const fin=esMens?reg.entrada:(simMin?reg.entrada+simMin*60000:Date.now());
+  const kwh=reg.kwh||0;
+  let liq;
+  if(esMens){
+    const tm=tarifas[reg.tipo]||tarifas.carro,lineas=[`Mensualidad completa: ${pesos(tm.mes)}`];
+    let total=tm.mes,recarga=0;
+    if(reg.electrico){
+      recarga=cfg.recarga.mes||0;
+      lineas.push(recarga?`Recarga eléctrica ilimitada: + ${pesos(recarga)}`:'Recarga eléctrica no incluida en la mensualidad');
+      total+=recarga;
+    }
+    liq={total,parqueo:tm.mes,recarga,min:0,lineas,mens:false};
+  }else{
+    liq=liquidar(reg.entrada,fin,reg.tipo,reg.placa,reg.electrico,kwh);
+  }
+  const t=TIPOS.find(x=>x.id===reg.tipo),medios=cfg.medios.filter(m=>m.on);
+
+  $('#panelLiq').innerHTML=`
+   <div class="tarjeta">
+     <h2>Recibo ${reg.recibo} <span class="n">${reg.placa}</span></h2>
+     <p class="nota">${t?t.etq:reg.tipo}${reg.electrico?' · <span class="chip el">recarga eléctrica</span>':''}
+       · entró ${fechaHora(reg.entrada)} · ${esMens?'tarifa mensual':dur(fin-reg.entrada)}
+       ${reg.celular?'· cel '+reg.celular:'· <span class="chip ro">sin celular</span>'}</p>
+     ${reg.electrico&&cfg.recarga.modo==='kwh'?`<div class="campo"><label for="inKwh">Energía entregada (kWh)</label>
+       <input id="inKwh" type="number" min="0" step="0.1" value="${kwh}" inputmode="decimal"></div>`:''}
+     <div class="liq"><div class="tot">${pesos(liq.total)}</div>
+       <div class="det">${liq.lineas.map(l=>'· '+l).join('<br>')}
+       ${liq.recarga?`<br><br>Parqueo ${pesos(liq.parqueo)} + recarga ${pesos(liq.recarga)}`:''}</div></div>
+     <label>Probar permanencia</label>
+     <div class="simul">
+       <button data-m="0" class="${!simMin?'on':''}">Real</button>
+       <button data-m="60" class="${simMin===60?'on':''}">1 hora</button>
+       <button data-m="180" class="${simMin===180?'on':''}">3 horas</button>
+       <button data-m="1500" class="${simMin===1500?'on':''}">1 día</button>
+       <button data-m="mes" class="${esMens?'on':''}">Mensual</button></div>
+     <div class="campo"><label for="medioPago">Medio de pago</label>
+       <select id="medioPago">${medios.map(m=>`<option value="${m.id}">${m.n}</option>`).join('')}
+         <option value="cortesia">Cortesía</option></select></div>
+     <button class="btn wa" id="btnEnviarPago">Enviar recibo de pago</button>
+     <button class="btn" id="btnConfirmar">Confirmar pago y salida</button>
+     <div class="fila" style="margin-top:9px">
+       <button class="btn sec" id="btnActualizar">Actualizar valor</button>
+       <button class="btn sec" id="btnCerrarLiq">Cerrar</button></div>
+   </div>`;
+
+  if($('#inKwh'))$('#inKwh').addEventListener('change',()=>{
+    reg.kwh=+$('#inKwh').value||0;sIng();mostrarLiquidacion(id,simMin)});
+  $$('#panelLiq .simul button').forEach(b=>b.addEventListener('click',()=>{
+    const v=b.dataset.m;mostrarLiquidacion(id,v==='mes'?'mes':(+v||0));
+  }));
+  $('#btnActualizar').addEventListener('click',()=>{mostrarLiquidacion(id);avisar('Valor recalculado a esta hora')});
+  $('#btnCerrarLiq').addEventListener('click',()=>$('#panelLiq').innerHTML='');
+  $('#btnEnviarPago').addEventListener('click',()=>{
+    const r=Object.assign({},reg,{salida:fin});
+    abrirWA(reg.celular,armar(cfg.pPago,datosRecibo(r,liq)),`Recibo de pago ${reg.recibo}`,liq.total)});
+  $('#btnConfirmar').addEventListener('click',()=>{
+    const real=Date.now(),f=liquidar(reg.entrada,real,reg.tipo,reg.placa,reg.electrico,reg.kwh||0);
+    reg.salida=real;reg.valor=f.total;reg.valorParqueo=f.parqueo;reg.valorRecarga=f.recarga;
+    reg.medio=$('#medioPago').value;sIng();
+    avisar(`Salida ${reg.placa} · ${pesos(f.total)}`,'ok');
+    $('#busca').value='';$('#resultados').innerHTML='';$('#panelLiq').innerHTML='';refrescar()});
+  $('#panelLiq').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* ═══════ PATIO ═══════ */
+$('#buscaPatio').addEventListener('input',pintarPatio);
+function pintarPatio(){
+  const q=norm($('#buscaPatio').value),dentro=ingresos.filter(i=>!i.salida);
+  const lista=q?dentro.filter(i=>i.placa.includes(q)):dentro;
+  $('#nPatio').textContent=dentro.length;
+  $('#patio').innerHTML=lista.length?lista.map(tarjetaAuto).join('')
+    :`<div class="vacio"><b>${q?'Sin coincidencias':'Patio vacío'}</b>${q?'':'Registra una entrada para verla aquí.'}</div>`;
+  $$('#patio .auto').forEach(b=>b.addEventListener('click',()=>{irA('cobrar');$('#busca').value='';mostrarLiquidacion(b.dataset.id)}));
+}
+
+/* ═══════ CAJA ═══════ */
+function rango(){if(!$('#rDesde').value)$('#rDesde').value=hoy();if(!$('#rHasta').value)$('#rHasta').value=hoy();
+  return[$('#rDesde').value,$('#rHasta').value]}
+function movimientos(d,h){
+  const sal=ingresos.filter(i=>i.salida&&dia(i.salida)>=d&&dia(i.salida)<=h)
+    .map(i=>({recibo:i.recibo,concepto:i.electrico?'Parqueo + recarga':'Parqueo',placa:i.placa,tipo:i.tipo,
+      valor:i.valor||0,recarga:i.valorRecarga||0,medio:i.medio,cuando:i.salida}));
+  const men=mensualidades.filter(m=>m.fecha&&dia(m.fecha)>=d&&dia(m.fecha)<=h)
+    .map(m=>({recibo:m.recibo,concepto:'Mensualidad'+(m.incluyeRecarga?' + recarga':''),placa:m.placa,tipo:m.tipo,
+      valor:m.valor||0,recarga:0,medio:m.medio,cuando:m.fecha}));
+  return[...sal,...men].sort((a,b)=>b.cuando-a.cuando);
+}
+function pintarCaja(){
+  const[d,h]=rango(),mov=movimientos(d,h);
+  const total=mov.reduce((s,m)=>s+m.valor,0),electro=mov.reduce((s,m)=>s+m.recarga,0);
+  const nMens=mov.filter(m=>m.concepto.startsWith('Mensualidad')).length;
+  $('#kpisCaja').innerHTML=
+    `<div class="kpi"><span>Movimientos</span><b>${mov.length}</b></div>
+     <div class="kpi"><span>Mensualidades</span><b>${nMens}</b></div>
+     <div class="kpi"><span>En patio</span><b>${ingresos.filter(i=>!i.salida).length}</b></div>
+     <div class="kpi e"><span>Recarga</span><b>${pesos(electro)}</b></div>
+     <div class="kpi v"><span>Total</span><b>${pesos(total)}</b></div>`;
+  const med={};mov.forEach(m=>{const k=m.medio||'—';med[k]=(med[k]||0)+m.valor});
+  $('#porMedio').innerHTML='<table><thead><tr><th>Medio de pago</th><th class="num">Total</th></tr></thead><tbody>'+
+    (Object.keys(med).length?Object.entries(med).map(([k,v])=>{
+      const n=(cfg.medios.find(x=>x.id===k)||{}).n||(k==='cortesia'?'Cortesía':k);
+      return `<tr><td>${n}</td><td class="num">${pesos(v)}</td></tr>`}).join('')
+      :'<tr><td colspan="2" class="vacio">Sin movimientos.</td></tr>')+'</tbody></table>';
+  $('#tablaCaja').innerHTML=mov.length?mov.map(m=>
+    `<tr><td class="recibo-num">${m.recibo}</td><td>${m.concepto}</td><td class="mono">${m.placa}</td>
+     <td class="num">${pesos(m.valor)}</td>
+     <td>${((cfg.medios.find(x=>x.id===m.medio)||{}).n)||(m.medio==='cortesia'?'Cortesía':'—')}</td></tr>`).join('')
+    :'<tr><td colspan="5" class="vacio">Sin movimientos en el rango.</td></tr>';
+}
+$('#rDesde').addEventListener('change',pintarCaja);
+$('#rHasta').addEventListener('change',pintarCaja);
+$('#btnCSV').addEventListener('click',()=>{
+  const[d,h]=rango();
+  const f=[['RECIBO','CONCEPTO','PLACA','VEHICULO','VALOR','RECARGA','MEDIO','FECHA']];
+  movimientos(d,h).forEach(m=>f.push([m.recibo,m.concepto,m.placa,m.tipo,m.valor,m.recarga,m.medio||'',
+    new Date(m.cuando).toLocaleString('es-CO')]));
+  bajar('﻿'+f.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(';')).join('\n'),`caja_${d}_${h}.csv`,'text/csv')});
+$('#btnCierreWA').addEventListener('click',()=>{
+  const[d,h]=rango(),mov=movimientos(d,h);
+  const total=mov.reduce((s,m)=>s+m.valor,0),electro=mov.reduce((s,m)=>s+m.recarga,0),med={};
+  mov.forEach(m=>{const k=m.medio||'—';med[k]=(med[k]||0)+m.valor});
+  const msg=`🅿️ *${cfg.nombre}*\n*CIERRE DE CAJA*\n${d===h?dFecha(d):dFecha(d)+' al '+dFecha(h)}\n\n`+
+    `Movimientos: ${mov.length}\nEn patio: ${ingresos.filter(i=>!i.salida).length}\n`+
+    (electro?`Recarga eléctrica: ${pesos(electro)}\n`:'')+'\n'+
+    Object.entries(med).map(([k,v])=>{const n=(cfg.medios.find(x=>x.id===k)||{}).n||(k==='cortesia'?'Cortesía':k);
+      return `${n}: ${pesos(v)}`}).join('\n')+
+    `\n\n*TOTAL: ${pesos(total)}*\nOperario: ${cfg.operario}`;
+  abrirWA('',msg,'Cierre de caja')});
+function bajar(t,n,tp){
+  if(window.AndroidDownload&&window.AndroidDownload.guardar){
+    try{
+      const b64=btoa(unescape(encodeURIComponent(t)));
+      window.AndroidDownload.guardar(n,tp,b64);
+      avisar('Archivo guardado en el dispositivo','ok');
+      return;
+    }catch(e){}
+  }
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:tp}));
+  a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}
+
+/* ═══════ AJUSTES · MENSUALIDADES ═══════ */
+function pintarMens(){
+  $('#mMedio').innerHTML=cfg.medios.filter(m=>m.on).map(m=>`<option value="${m.id}">${m.n}</option>`).join('');
+  $('#mTxtRec').textContent=`+ ${pesos(cfg.recarga.mes)} sobre la mensualidad`;
+  if(!$('#mValor').value)$('#mValor').value=tarifas[$('#mTipo').value||'carro'].mes;
+  const l=[...mensualidades].sort((a,b)=>b.hasta.localeCompare(a.hasta));
+  $('#tablaMens').innerHTML=l.length?l.map(m=>{const act=m.hasta>=hoy();
+    return `<tr><td class="mono" style="color:var(--ambar)">${m.placa}${m.incluyeRecarga?' ⚡':''}</td>
+      <td>${m.titular||'—'}</td><td><span class="chip ${act?'':'am'}">${dFecha(m.hasta)}</span></td>
+      <td class="num">${pesos(m.valor)}</td>
+      <td style="text-align:right"><button class="btn sec" style="width:auto;display:inline-block;padding:5px 9px;font-size:13px;color:var(--rojo)" data-del="${m.id}">Borrar</button></td></tr>`}).join('')
+    :'<tr><td colspan="5" class="vacio">Sin mensualidades registradas.</td></tr>';
+  $$('#tablaMens [data-del]').forEach(b=>b.addEventListener('click',()=>{
+    if(!confirm('¿Borrar esta mensualidad?'))return;
+    mensualidades=mensualidades.filter(m=>m.id!==b.dataset.del);sMen();pintarMens()}));
+}
+function valorSugerido(){
+  const t=$('#mTipo').value||'carro';
+  const v=tarifas[t].mes+($('#mIncluyeRec').checked?(+cfg.recarga.mes||0):0);
+  $('#mValor').value=v;
+}
+$('#mTipo').addEventListener('change',valorSugerido);
+$('#mIncluyeRec').addEventListener('change',e=>{
+  $('#swMensRec').classList.toggle('on',e.target.checked);valorSugerido()});
+$('#mPlaca').addEventListener('input',()=>{
+  $('#mPlaca').value=norm($('#mPlaca').value);
+  const c=clientes.find(x=>x.placa===$('#mPlaca').value);
+  if(c){if(!$('#mNombre').value)$('#mNombre').value=c.nombre||'';
+    if(!$('#mCel').value)$('#mCel').value=c.celular||'';
+    if(c.tipo){$('#mTipo').value=c.tipo;valorSugerido()}}});
+$('#btnMensGuardar').addEventListener('click',()=>registrarMens(false));
+$('#btnMensRecibo').addEventListener('click',()=>registrarMens(true));
+function registrarMens(enviar){
+  const placa=norm($('#mPlaca').value);
+  if(placa.length<3){avisar('La placa es obligatoria','err');return}
+  if(!$('#mHasta').value){avisar('Indica hasta cuándo va la mensualidad','err');return}
+  const m={id:uid(),recibo:nuevoRecibo(),placa,tipo:$('#mTipo').value,
+    titular:$('#mNombre').value.trim(),celular:$('#mCel').value.trim(),
+    desde:$('#mDesde').value||hoy(),hasta:$('#mHasta').value,
+    incluyeRecarga:$('#mIncluyeRec').checked,valor:+$('#mValor').value||0,
+    medio:$('#mMedio').value,fecha:Date.now(),operario:cfg.operario};
+  mensualidades.unshift(m);sMen();
+  const i=clientes.findIndex(c=>c.placa===placa);
+  if(i>=0)Object.assign(clientes[i],{nombre:m.titular||clientes[i].nombre,celular:m.celular||clientes[i].celular,tipo:m.tipo});
+  else clientes.push({placa,nombre:m.titular,celular:m.celular,tipo:m.tipo});
+  sCli();
+
+  if(enviar){
+    const t=TIPOS.find(x=>x.id===m.tipo);
+    const msg=`🅿️ *${cfg.nombre}*\n${cfg.direccion||''}${cfg.telefono?' · Tel '+cfg.telefono:''}\nNIT ${cfg.nit||'—'}\n\n`+
+      `*RECIBO N° ${m.recibo}*\nMENSUALIDAD\n\nPlaca: *${m.placa}*\nVehículo: ${t?t.etq:m.tipo}\n`+
+      `Titular: ${m.titular||'—'}\nVigencia: ${dFecha(m.desde)} al ${dFecha(m.hasta)}\n`+
+      (m.incluyeRecarga?'Incluye recarga eléctrica ilimitada\n':'')+
+      `\n*VALOR: ${pesos(m.valor)}*\n\n${bloqueMedios(m.valor)}\n\nAtendió: ${cfg.operario} · ${fechaHora(Date.now())}`;
+    abrirWA(m.celular,msg,`Recibo de mensualidad ${m.recibo}`,m.valor);
+  }
+  ['mPlaca','mNombre','mCel','mDesde','mHasta'].forEach(id=>$('#'+id).value='');
+  $('#mIncluyeRec').checked=false;$('#swMensRec').classList.remove('on');valorSugerido();
+  pintarMens();refrescar();avisar(`Mensualidad ${m.recibo} registrada`,'ok');
+}
+
+/* ═══════ AJUSTES · RECARGA ═══════ */
+function pintarRecarga(){
+  const r=cfg.recarga;
+  $('#eModo').value=r.modo;$('#eValor').value=r.valor;$('#eConexion').value=r.conexion;$('#eMes').value=r.mes;
+}
+$('#btnRecarga').addEventListener('click',()=>{
+  cfg.recarga={modo:$('#eModo').value,valor:+$('#eValor').value||0,
+    conexion:+$('#eConexion').value||0,mes:+$('#eMes').value||0};
+  sCfg();pintarTipos();pintarMens();avisar('Recarga eléctrica guardada','ok')});
+
+/* ═══════ AJUSTES · TARIFAS ═══════ */
+function pintarTarifas(){
+  $('#tablaTarifas').innerHTML=TIPOS.map(t=>{const x=tarifas[t.id];
+    return `<tr><td>${t.n}</td>
+      <td><input type="number" min="0" value="${x.min}" data-t="${t.id}" data-c="min" style="text-align:right;padding:8px"></td>
+      <td><input type="number" min="0" step="500" value="${x.dia}" data-t="${t.id}" data-c="dia" style="text-align:right;padding:8px"></td>
+      <td><input type="number" min="0" step="1000" value="${x.mes}" data-t="${t.id}" data-c="mes" style="text-align:right;padding:8px"></td></tr>`}).join('');
+  $$('#tablaTarifas input').forEach(i=>i.addEventListener('change',()=>{
+    tarifas[i.dataset.t][i.dataset.c]=+i.value||0;sTar();revisarTopes();pintarTipos();avisar('Tarifa guardada','ok')}));
+  $('#rGracia').value=cfg.gracia;$('#rRedondeo').value=cfg.redondeo;$('#rSelloOro').checked=!!cfg.selloOro;
+  revisarTopes();
+}
+function revisarTopes(){
+  const av=TIPOS.filter(t=>tarifas[t.id].min>TOPES[t.id][cfg.selloOro?'oro':'normal'])
+    .map(t=>`${t.n}: ${pesos(tarifas[t.id].min)}/min supera el tope de ${pesos(TOPES[t.id][cfg.selloOro?'oro':'normal'])}`);
+  $('#alertasTope').innerHTML=av.length
+    ?`<p class="alerta-tope">⚠ ${av.join('<br>⚠ ')}<br><span class="nota">Topes de Bogotá 2026. En otra ciudad, guíate por su decreto local.</span></p>`
+    :`<p class="nota" style="margin-top:8px">Tarifas dentro de los topes de Bogotá 2026${cfg.selloOro?' (Sello Oro)':''}.</p>`;
+}
+$('#rSelloOro').addEventListener('change',()=>{cfg.selloOro=$('#rSelloOro').checked;sCfg();revisarTopes()});
+$('#btnReglas').addEventListener('click',()=>{
+  cfg.gracia=+$('#rGracia').value||0;cfg.redondeo=+$('#rRedondeo').value||1;cfg.selloOro=$('#rSelloOro').checked;
+  sCfg();revisarTopes();pintarTipos();avisar('Reglas guardadas','ok')});
+
+/* ═══════ AJUSTES · MEDIOS ═══════ */
+function pintarMedios(){
+  $('#mediosPago').innerHTML=cfg.medios.map((m,i)=>`
+    <div style="border:1px solid var(--linea);border-radius:10px;padding:12px;margin-bottom:10px">
+      <label style="display:flex;gap:9px;align-items:center;text-transform:none;letter-spacing:0;font-size:15px;color:var(--tinta);margin-bottom:${m.on?'10px':'0'}">
+        <input type="checkbox" data-i="${i}" data-c="on" ${m.on?'checked':''} style="width:20px;height:20px;flex:none"><b>${m.n}</b>
+        ${m.app?`<span class="chip" style="margin-left:auto;background:${m.marca||'var(--panel2)'};color:${m.txt||'#fff'}">Pago con app</span>`:''}</label>
+      <div ${m.on?'':'hidden'}>
+        <div class="campo" style="margin-bottom:8px"><label>Número o cuenta</label>
+          <input type="text" data-i="${i}" data-c="dato" value="${m.dato||''}" placeholder="${m.id==='efectivo'?'Ej. Pago en la caseta':'Ej. 300 000 0000'}" style="padding:10px"></div>
+        <div class="campo" style="margin-bottom:0"><label>Enlace de pago</label>
+          <input type="text" data-i="${i}" data-c="link" value="${m.link||''}" placeholder="https://…" style="padding:10px"></div>
+        ${m.app?`<p class="nota" style="margin-top:10px">En el recibo de pago aparece el botón "Pagar con ${m.n}":
+          copia el valor al portapapeles y abre su app para completar el pago con tu validación.</p>`:''}
+      </div></div>`).join('');
+  $$('#mediosPago input').forEach(inp=>inp.addEventListener('change',()=>{
+    const m=cfg.medios[+inp.dataset.i];
+    m[inp.dataset.c]=inp.type==='checkbox'?inp.checked:inp.value.trim();
+    sCfg();if(inp.dataset.c==='on'){pintarMedios();pintarMens()}else avisar('Medio de pago guardado','ok')}));
+}
+
+/* ═══════ AJUSTES · DATOS ═══════ */
+function pintarAjustes(){
+  $('#aNombre').value=cfg.nombre;$('#aNit').value=cfg.nit;$('#aTel').value=cfg.telefono;$('#aDir').value=cfg.direccion;
+  $('#aOperario').value=cfg.operario;$('#aPrefijo').value=cfg.prefijo;$('#aConsec').value=cfg.consecutivo;
+  $('#pIngreso').value=cfg.pIngreso;$('#pPago').value=cfg.pPago;
+  $('#notaAlmacen').textContent=Store.persistente
+    ?'Los datos quedan guardados en este celular. Descarga el respaldo con frecuencia.'
+    :'Este visor no permite guardar. Descarga el archivo y ábrelo desde el celular.';
+}
+$('#btnDatos').addEventListener('click',()=>{
+  cfg.nombre=$('#aNombre').value.trim()||'Parqueadero';cfg.nit=$('#aNit').value.trim();
+  cfg.telefono=$('#aTel').value.trim();cfg.direccion=$('#aDir').value.trim();
+  cfg.operario=$('#aOperario').value.trim()||'Operario';cfg.prefijo=$('#aPrefijo').value.trim()||'PQ-';
+  cfg.consecutivo=+$('#aConsec').value||1001;sCfg();cabecera();refrescar();avisar('Datos guardados','ok')});
+$('#btnPlantillas').addEventListener('click',()=>{
+  cfg.pIngreso=$('#pIngreso').value||P_INGRESO;cfg.pPago=$('#pPago').value||P_PAGO;sCfg();avisar('Plantillas guardadas','ok')});
+$('#btnPlantillasBase').addEventListener('click',()=>{
+  cfg.pIngreso=P_INGRESO;cfg.pPago=P_PAGO;sCfg();pintarAjustes();avisar('Plantillas restauradas')});
+
+/* ═══════ RESPALDO ═══════ */
+$('#btnExportar').addEventListener('click',()=>bajar(JSON.stringify({cfg,tarifas,clientes,ingresos,mensualidades},null,2),
+  `respaldo_parqueadero_${hoy()}.json`,'application/json'));
+$('#btnImportar').addEventListener('click',()=>$('#fileRespaldo').click());
+$('#fileRespaldo').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);
+    if(d.cfg){cfg=Object.assign({},CFG_BASE,d.cfg);cfg.recarga=Object.assign({},RECARGA_BASE,d.cfg.recarga||{})}
+    if(d.tarifas)tarifas=Object.assign({},TARIFAS_BASE,d.tarifas);
+    if(d.clientes)clientes=d.clientes;if(d.ingresos)ingresos=d.ingresos;if(d.mensualidades)mensualidades=d.mensualidades;
+    sCfg();sTar();sCli();sIng();sMen();arrancar();avisar('Respaldo restaurado','ok')}
+    catch(err){avisar('El archivo no tiene el formato esperado','err')}};
+  r.readAsText(f);e.target.value=''});
+$('#btnBorrar').addEventListener('click',()=>{
+  if(!confirm('Se borran ingresos, mensualidades, clientes y configuración. ¿Continuar?'))return;
+  Object.values(K).forEach(k=>Store.del(k));
+  cfg=JSON.parse(JSON.stringify(CFG_BASE));tarifas=Object.assign({},TARIFAS_BASE);
+  clientes=[];ingresos=[];mensualidades=[];arrancar();avisar('Datos borrados')});
+
+/* ═══════ ARRANQUE ═══════ */
+function cabecera(){$('#hNombre').textContent=cfg.nombre;$('#hOperario').textContent=cfg.operario;
+  document.title=cfg.nombre+' · Recibo por WhatsApp'}
+function refrescar(){
+  const dentro=ingresos.filter(i=>!i.salida),h=hoy();
+  const mov=movimientos(h,h);
+  $('#kPatio').textContent=dentro.length;
+  $('#kSalidas').textContent=mov.length;
+  $('#kRecaudo').textContent=pesos(mov.reduce((s,m)=>s+m.valor,0));
+  $('#kElectro').textContent=pesos(mov.reduce((s,m)=>s+m.recarga,0));
+  $('#nPatio').textContent=dentro.length;
+  $('#badgePatio').textContent=dentro.length||'';
+  $('#badgePatio').className=dentro.length?'badge':'';
+  $('#proxRecibo').textContent=cfg.prefijo+String(cfg.consecutivo).padStart(4,'0');
+}
+function arrancar(){
+  cabecera();pintarTipos();pintarAjustes();pintarTarifas();pintarMedios();pintarRecarga();
+  $('#rDesde').value=hoy();$('#rHasta').value=hoy();pintarMens();refrescar();pintarPatio();
+}
+const tic=()=>$('#reloj').textContent=new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+tic();setInterval(tic,15000);
+setInterval(()=>{if($('#v-patio').classList.contains('on'))pintarPatio();refrescar()},60000);
+arrancar();
+</script>
+<!-- parkops-v1.5.1.js -->
+<script>
+(()=>{
+'use strict';
+const QUEUE='parkops.v15.pendingReceipts';const LEGACY_CFG='parkops.v15.config';const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(d))}catch{return d}};const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));const queue=()=>read(QUEUE,[]);const saveQueue=v=>write(QUEUE,v);let internetOk=navigator.onLine!==false,checking=false;const online=()=>internetOk===true;const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function toast(msg){let e=document.getElementById('parkops-v151-toast');if(!e){e=document.createElement('div');e.id='parkops-v151-toast';e.style.cssText='position:fixed;left:50%;bottom:82px;transform:translateX(-50%);z-index:2147483647;background:#111827;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 8px 30px #0005;max-width:90%;font:600 14px system-ui';document.body.appendChild(e)}e.textContent=msg;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',3500)}
+function findClock(){const all=[...document.querySelectorAll('body *')];return all.find(e=>{const t=(e.textContent||'').trim();return /^([01]?\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(t)&&e.children.length===0})||null}
+function positionStatus(){const b=document.getElementById('parkops-net-status');if(!b)return;const clock=findClock();if(clock){const r=clock.getBoundingClientRect();const top=Math.max(2,r.top-17);b.style.top=top+'px';b.style.left=Math.min(window.innerWidth-42,Math.max(42,r.left+r.width/2))+'px';b.style.transform='translateX(-50%)'}else{b.style.top='2px';b.style.right='6px';b.style.left='auto';b.style.transform='none'}}
+function setStatus(){let b=document.getElementById('parkops-net-status');if(!b){b=document.createElement('button');b.id='parkops-net-status';b.style.cssText='position:fixed;z-index:2147483645;border:0;border-radius:999px;padding:2px 6px;color:white;font:700 8px system-ui;line-height:12px;box-shadow:0 2px 6px #0003;white-space:nowrap;min-height:16px';b.onclick=openPending;document.body.appendChild(b)}const n=queue().length;b.textContent=online()?`● ONLINE${n?` · ${n}`:''}`:`● OFFLINE${n?` · ${n}`:''}`;b.style.background=online()?'#15803d':'#b45309';positionStatus()}
+async function probeInternet(){if(checking)return online();checking=true;const previous=internetOk;try{if(navigator.onLine===false)internetOk=false;else{const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),3500);try{await fetch('https://www.gstatic.com/generate_204?parkops='+Date.now(),{method:'GET',mode:'no-cors',cache:'no-store',signal:controller.signal});internetOk=true}catch(e){internetOk=false}finally{clearTimeout(timer)}}}finally{checking=false;setStatus()}if(previous&&!internetOk)toast('Modo contingencia activado. PARKOPS seguirá guardando la operación localmente.');if(!previous&&internetOk&&queue().length){toast('Conexión recuperada. Hay recibos pendientes para enviar.');setTimeout(openPending,500)}return online()}
+function enqueueWhatsApp(url){const q=queue();q.push({id:Date.now()+'-'+Math.random().toString(36).slice(2),url,createdAt:new Date().toISOString()});saveQueue(q);setStatus();toast('Sin conexión: la operación sigue guardada y el recibo quedó pendiente para WhatsApp.')}
+const originalOpen=window.open.bind(window);window.open=function(url,...args){const u=String(url||'');if(/^https?:\/\/(wa\.me|api\.whatsapp\.com)\//i.test(u)&&!online()){enqueueWhatsApp(u);return null}return originalOpen(url,...args)};
+function openPending(){const q=queue();document.getElementById('parkops-pending-modal')?.remove();const d=document.createElement('div');d.id='parkops-pending-modal';d.style.cssText='position:fixed;inset:0;background:#0009;z-index:2147483646;display:grid;place-items:center;padding:16px;font-family:system-ui';d.innerHTML=`<div style="background:#fff;color:#111827;border-radius:16px;padding:20px;width:min(620px,100%);max-height:88vh;overflow:auto"><h2 style="margin-top:0">${online()?'Conexión disponible':'Modo contingencia'}</h2><p>${online()?'Puedes enviar ahora los recibos que quedaron pendientes.':'PARKOPS continúa operando y conserva la información localmente. Los recibos quedan disponibles hasta recuperar la conexión.'}</p><h3>Recibos pendientes: ${q.length}</h3>${q.map((x,i)=>`<div style="padding:10px;border:1px solid #e5e7eb;border-radius:10px;margin:8px 0"><b>Recibo ${i+1}</b><br><small>${esc(new Date(x.createdAt).toLocaleString('es-CO'))}</small>${online()?`<br><button data-send="${esc(x.id)}" style="margin-top:7px;padding:8px 12px">Enviar por WhatsApp</button>`:''}</div>`).join('')||'<p>No hay recibos pendientes.</p>'}<button id="pq-close" style="padding:9px 14px">Cerrar</button></div>`;document.body.appendChild(d);d.querySelector('#pq-close').onclick=()=>d.remove();d.querySelectorAll('[data-send]').forEach(b=>b.onclick=()=>{const list=queue(),item=list.find(x=>x.id===b.dataset.send);if(!item)return;originalOpen(item.url,'_blank','noopener');saveQueue(list.filter(x=>x.id!==item.id));d.remove();setStatus();toast('Recibo preparado para enviar por WhatsApp.')})}
+function standardBreb(){if(typeof cfg==='undefined'||!Array.isArray(cfg.medios))return false;let m=cfg.medios.find(x=>String(x.id||'').toLowerCase()==='breb'||/bre-?b/i.test(String(x.n||'')));if(!m){const legacy=read(LEGACY_CFG,{}).breb||{};m={id:'breb',n:'Bre-B',on:true,dato:legacy.keyValue||'',link:'',keyType:legacy.keyType||'',holder:legacy.holder||'',marca:'#111827',txt:'#fff'};const pos=cfg.medios.findIndex(x=>String(x.id||'').toLowerCase()==='daviplata');cfg.medios.splice(pos>=0?pos+1:cfg.medios.length,0,m);if(typeof sCfg==='function')sCfg()}else{m.id='breb';m.n='Bre-B';if(m.on===undefined)m.on=true;if(m.keyType===undefined)m.keyType='';if(m.holder===undefined)m.holder='';if(m.dato===undefined)m.dato='';if(m.link===undefined)m.link=''}return true}
+function decorateBreb(){if(typeof cfg==='undefined'||!Array.isArray(cfg.medios))return;const i=cfg.medios.findIndex(x=>String(x.id||'').toLowerCase()==='breb');if(i<0)return;const chk=document.querySelector(`#mediosPago input[data-i="${i}"][data-c="on"]`),card=chk?.closest('div[style*="border"]');if(!card||card.dataset.brebReady)return;card.dataset.brebReady='1';const m=cfg.medios[i],bold=card.querySelector('label b');if(bold)bold.textContent='Bre-B';const fields=card.querySelectorAll('.campo');if(fields[0]){const l=fields[0].querySelector('label'),inp=fields[0].querySelector('input');if(l)l.textContent='Llave Bre-B';if(inp){inp.placeholder='Ej. celular, correo, cédula o llave alfanumérica';inp.value=m.dato||''}}const body=chk.parentElement?.nextElementSibling;if(!body)return;const extra=document.createElement('div');extra.className='parkops-breb-inline';extra.innerHTML=`<div class="campo" style="margin-bottom:8px"><label>Tipo de llave</label><select id="breb-key-type" style="width:100%;padding:10px"><option value="">Seleccionar</option>${['Celular','Cédula','Correo','Código alfanumérico'].map(x=>`<option value="${x}" ${m.keyType===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="campo" style="margin-bottom:8px"><label>Titular / nombre comercial</label><input id="breb-holder" type="text" value="${esc(m.holder||'')}" placeholder="Nombre del titular de la llave" style="padding:10px"></div><p class="nota" style="margin:4px 0 0">Bre-B funciona como un medio de pago más, igual que Nequi o Daviplata. La aplicación guarda únicamente la llave configurada; nunca solicita claves bancarias.</p>`;const linkField=fields[1];if(linkField)body.insertBefore(extra,linkField);else body.appendChild(extra);extra.querySelector('#breb-key-type').addEventListener('change',e=>{m.keyType=e.target.value;if(typeof sCfg==='function')sCfg();toast('Tipo de llave Bre-B guardado.')});extra.querySelector('#breb-holder').addEventListener('change',e=>{m.holder=e.target.value.trim();if(typeof sCfg==='function')sCfg();toast('Titular Bre-B guardado.')})}
+function refreshPaymentUi(){if(!standardBreb())return;if(typeof pintarMedios==='function'){const c=document.getElementById('mediosPago');if(c&&!c.querySelector('input[data-breb-refresh]'))pintarMedios()}decorateBreb();if(typeof pintarMens==='function')pintarMens()}
+function enhance(){document.getElementById('parkops-breb-btn')?.remove();refreshPaymentUi();setStatus();probeInternet();setInterval(probeInternet,8000);setInterval(positionStatus,1000)}
+window.addEventListener('resize',positionStatus);window.addEventListener('online',probeInternet);window.addEventListener('offline',()=>{internetOk=false;setStatus();toast('Modo contingencia activado. PARKOPS seguirá guardando la operación localmente.')});window.ParkopsContingency={isOnline:online,checkInternet:probeInternet,pending:queue,openPending,version:'1.5.3'};const obs=new MutationObserver(()=>{document.getElementById('parkops-breb-btn')?.remove();standardBreb();decorateBreb();positionStatus()});obs.observe(document.documentElement,{childList:true,subtree:true});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',enhance);else enhance();
+})();
+</script>
+<!-- parkops-v1.6.0.js -->
+<script>
+(()=>{
+'use strict';
+const V='1.6.0',TYPES=['carro','moto','bicicleta','patineta'];
+const LABEL={carro:'Carros',moto:'Motos',bicicleta:'Bicicletas',patineta:'Patinetas'};
+const PREFIX={carro:'C',moto:'M',bicicleta:'B',patineta:'P'};
+function initCfg(){cfg.capacity=Object.assign({enabled:false,carro:0,moto:0,bicicleta:0,patineta:0},cfg.capacity||{});cfg.billing=Object.assign({enabled:false,provider:'',url:'',buttonText:'FACTURA ELECTRÓNICA',mode:'external_url'},cfg.billing||{});let changed=false;ingresos.forEach(r=>{if(r.status==null){r.status=r.salida?'SALIDO':'EN_PATIO';changed=true}if(r.occupiesSlot==null){r.occupiesSlot=!r.salida;changed=true}if(r.slotProvisional==null){r.slotProvisional=false;changed=true}});TYPES.forEach(t=>{const used=new Set(ingresos.filter(r=>r.tipo===t&&r.occupiesSlot&&r.slotNumber).map(r=>+r.slotNumber));ingresos.filter(r=>r.tipo===t&&r.occupiesSlot&&!r.slotNumber).forEach(r=>{let n=1;while(used.has(n))n++;used.add(n);r.slotNumber=n;r.slotCode=`${PREFIX[t]}-${String(n).padStart(3,'0')}`;changed=true})});sCfg();if(changed)sIng()}
+function occupied(t){return ingresos.filter(r=>r.tipo===t&&r.occupiesSlot!==false&&!r.salida).length}
+function nextSlot(t){const used=new Set(ingresos.filter(r=>r.tipo===t&&r.occupiesSlot!==false&&!r.salida).map(r=>+r.slotNumber).filter(Boolean));const max=cfg.capacity.enabled?Math.max(0,+cfg.capacity[t]||0):999999;for(let n=1;n<=max;n++)if(!used.has(n))return n;return null}
+function slotCode(t,n){return n?`${PREFIX[t]||'X'}-${String(n).padStart(3,'0')}`:''}
+function availability(t){const cap=Math.max(0,+cfg.capacity[t]||0),occ=occupied(t);return{cap,occ,free:Math.max(0,cap-occ),pct:cap?Math.min(100,occ/cap*100):0}}
+function capacityOk(t){if(!cfg.capacity.enabled)return true;const a=availability(t);return a.cap>0&&a.free>0}
+const oldDatosRecibo=datosRecibo;datosRecibo=function(reg,liq){const d=oldDatosRecibo(reg,liq);d.cupo=reg.slotCode||'—';d.vehiculo=`${d.vehiculo} · Cupo ${d.cupo}`;return d};
+const oldRegistrarEntrada=registrarEntrada;registrarEntrada=function(enviar){const placa=norm(inPlaca.value);if(placa.length<3)return oldRegistrarEntrada(enviar);if(ingresos.some(i=>i.placa===placa&&!i.salida)){avisar(`${placa} ya está en el patio`,'err');return}if(!capacityOk(tipoSel)){const a=availability(tipoSel);avisar(a.cap?`SIN CUPOS DISPONIBLES PARA ${LABEL[tipoSel].toUpperCase()}`:`Capacidad de ${LABEL[tipoSel]} configurada en 0`,'err');return}const n=nextSlot(tipoSel);const before=new Set(ingresos.map(x=>x.id));oldRegistrarEntrada(enviar);const reg=ingresos.find(x=>!before.has(x.id));if(!reg)return;reg.slotNumber=n||1;reg.slotCode=slotCode(reg.tipo,reg.slotNumber);reg.occupiesSlot=true;reg.slotProvisional=!window.ParkopsContingency?.isOnline?.();reg.status='EN_PATIO';sIng();refrescar()};
+const oldTarjetaAuto=tarjetaAuto;tarjetaAuto=function(i){const raw=oldTarjetaAuto(i);const badge=`<span class="chip" style="margin-left:5px">${i.slotCode||'Sin cupo'}</span>${i.status==='LIQUIDADO'?'<span class="chip" style="margin-left:5px;background:#f59e0b;color:#111">LIQUIDADO</span>':''}`;return raw.replace('</div></div>',`${badge}</div></div>`)};
+function capacityPanel(){const rows=TYPES.map(t=>{const a=availability(t);return `<div style="padding:10px;border:1px solid var(--linea);border-radius:10px"><b>${LABEL[t]}</b><div class="nota">${a.occ} / ${a.cap||'—'} ocupados · <b>${cfg.capacity.enabled?a.free:'∞'} disponibles</b>${a.cap?` · ${a.pct.toFixed(1)}%`:''}</div></div>`}).join('');const cap=TYPES.reduce((s,t)=>s+(+cfg.capacity[t]||0),0),occ=TYPES.reduce((s,t)=>s+occupied(t),0);return `<div id="parkops-capacity-panel" class="tarjeta" style="margin-bottom:12px"><h2>Disponibilidad en tiempo real</h2><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">${rows}</div><p class="nota" style="margin:10px 0 0"><b>Total:</b> ${occ} ocupados · ${cfg.capacity.enabled?Math.max(0,cap-occ)+' disponibles':'control de capacidad no activado'}</p></div>`}
+const oldPintarPatio=pintarPatio;pintarPatio=function(){document.getElementById('parkops-capacity-panel')?.remove();oldPintarPatio();const p=document.getElementById('patio');if(p)p.insertAdjacentHTML('beforebegin',capacityPanel())};
+function freeze(reg,liq,medio){const now=Date.now();reg.liquidatedAt=reg.liquidatedAt||now;reg.billingFrozenAt=reg.billingFrozenAt||now;reg.durationMinutesFrozen=reg.durationMinutesFrozen??liq.min;reg.valor=reg.valor??liq.total;reg.valorParqueo=reg.valorParqueo??liq.parqueo;reg.valorRecarga=reg.valorRecarga??liq.recarga;reg.medio=reg.medio||medio;reg.status='LIQUIDADO';reg.occupiesSlot=true;sIng();return reg}
+function frozenLiq(reg){return{total:+reg.valor||0,parqueo:+reg.valorParqueo||0,recarga:+reg.valorRecarga||0,min:+reg.durationMinutesFrozen||0,lineas:[`Liquidación congelada ${fechaHora(reg.billingFrozenAt||reg.liquidatedAt)}`],mens:false}}
+function validBillingUrl(u){try{const x=new URL(u);return x.protocol==='https:'||x.protocol==='http:'}catch{return false}}
+function addBillingButton(card){if(!cfg.billing?.enabled||!validBillingUrl(cfg.billing.url)||document.getElementById('btnFacturaElectronica'))return;const b=document.createElement('button');b.className='btn sec';b.id='btnFacturaElectronica';b.textContent=cfg.billing.buttonText||'FACTURA ELECTRÓNICA';b.onclick=()=>{location.href=cfg.billing.url};card.appendChild(b)}
+const oldMostrarLiquidacion=mostrarLiquidacion;mostrarLiquidacion=function(id,simMin){const reg=ingresos.find(i=>i.id===id);if(!reg)return;oldMostrarLiquidacion(id,reg.status==='LIQUIDADO'?(reg.durationMinutesFrozen||1):simMin);const panel=document.getElementById('panelLiq');if(!panel)return;if(reg.status==='LIQUIDADO'){const liq=frozenLiq(reg),tot=panel.querySelector('.tot');if(tot)tot.textContent=pesos(liq.total);const det=panel.querySelector('.det');if(det)det.innerHTML=`· <b>LIQUIDADO</b> · valor y tiempo congelados<br>· Permanencia facturada: ${dur(liq.min*60000)}<br>· Cupo ${reg.slotCode||'—'} continúa ocupado`;panel.querySelectorAll('.simul,#btnActualizar,#btnEnviarPago,#btnConfirmar').forEach(x=>x.style.display='none');const card=panel.querySelector('.tarjeta');if(card&&!document.getElementById('btnLiberarCupo')){const b=document.createElement('button');b.className='btn';b.id='btnLiberarCupo';b.textContent='MARCAR SALIDA · LIBERAR CUPO';b.onclick=()=>{if(!confirm(`¿Confirmar salida física de ${reg.placa} y liberar ${reg.slotCode||'el cupo'}?`))return;reg.salida=Date.now();reg.exitAt=reg.salida;reg.occupiesSlot=false;reg.status='SALIDO';sIng();avisar(`Salida física ${reg.placa} · cupo ${reg.slotCode||''} liberado`,'ok');document.getElementById('busca').value='';document.getElementById('resultados').innerHTML='';panel.innerHTML='';refrescar()};card.appendChild(b);addBillingButton(card)}return}const send=panel.querySelector('#btnEnviarPago'),confirmBtn=panel.querySelector('#btnConfirmar');if(send){const clone=send.cloneNode(true);send.replaceWith(clone);clone.addEventListener('click',()=>{const fin=Date.now(),liq=liquidar(reg.entrada,fin,reg.tipo,reg.placa,reg.electrico,reg.kwh||0);freeze(reg,liq,document.getElementById('medioPago')?.value);const r=Object.assign({},reg,{salida:reg.liquidatedAt});abrirWA(reg.celular,armar(cfg.pPago,datosRecibo(r,liq)),`Recibo de pago ${reg.recibo}`,liq.total);avisar(`Liquidación congelada · ${reg.placa}`,'ok');setTimeout(()=>mostrarLiquidacion(reg.id),150)})}if(confirmBtn){confirmBtn.textContent='LIQUIDAR PAGO · NO LIBERA CUPO';const clone=confirmBtn.cloneNode(true);confirmBtn.replaceWith(clone);clone.addEventListener('click',()=>{const fin=Date.now(),liq=liquidar(reg.entrada,fin,reg.tipo,reg.placa,reg.electrico,reg.kwh||0);freeze(reg,liq,document.getElementById('medioPago')?.value);avisar(`Pago liquidado · ${reg.slotCode||''} sigue ocupado`,'ok');mostrarLiquidacion(reg.id)})}};
+function injectSettings(){return;/* v1.6.5: bloque superseded por parkops-v1.6.1.js; lanzaba ReferenceError: esc is not defined e interrumpia el init de 1.6.0 */const view=document.getElementById('v-ajustes');if(!view)return;const d=document.createElement('details');d.className='acordeon';d.id='parkops-capacity-settings';d.innerHTML=`<summary>Capacidad y facturación electrónica</summary><div class="cuerpo"><h3>Capacidad del parqueadero</h3><label class="switch"><input id="capEnabled" type="checkbox" ${cfg.capacity.enabled?'checked':''}><span class="txt">Activar control máximo de cupos</span></label><div class="fila">${TYPES.map(t=>`<div class="campo"><label>${LABEL[t]}</label><input type="number" min="0" data-cap="${t}" value="${+cfg.capacity[t]||0}"></div>`).join('')}</div><button class="btn" id="btnCapSave">Guardar capacidad</button><hr style="border:0;border-top:1px solid var(--linea);margin:18px 0"><h3>Facturación electrónica</h3><label class="switch"><input id="billEnabled" type="checkbox" ${cfg.billing.enabled?'checked':''}><span class="txt">Habilitar botón de factura electrónica</span></label><div class="campo"><label>Proveedor</label><input id="billProvider" value="${esc(cfg.billing.provider||'')}"></div><div class="campo"><label>URL del facturador</label><input id="billUrl" type="url" value="${esc(cfg.billing.url||'')}" placeholder="https://..."></div><div class="campo"><label>Texto del botón</label><input id="billText" value="${esc(cfg.billing.buttonText||'FACTURA ELECTRÓNICA')}"></div><button class="btn" id="btnBillSave">Guardar facturación</button></div>`;view.appendChild(d);d.querySelector('#btnCapSave').onclick=()=>{cfg.capacity.enabled=d.querySelector('#capEnabled').checked;d.querySelectorAll('[data-cap]').forEach(i=>cfg.capacity[i.dataset.cap]=Math.max(0,+i.value||0));sCfg();avisar('Capacidad guardada','ok');refrescar()};d.querySelector('#btnBillSave').onclick=()=>{const u=d.querySelector('#billUrl').value.trim(),en=d.querySelector('#billEnabled').checked;if(en&&!validBillingUrl(u)){avisar('URL de facturación inválida. Usa https://','err');return}cfg.billing={enabled:en,provider:d.querySelector('#billProvider').value.trim(),url:u,buttonText:d.querySelector('#billText').value.trim()||'FACTURA ELECTRÓNICA',mode:'external_url'};sCfg();avisar('Facturación electrónica guardada','ok')}}
+initCfg();injectSettings();const mo=new MutationObserver(()=>injectSettings());mo.observe(document.documentElement,{childList:true,subtree:true});window.ParkopsCapacity={version:V,availability,nextSlot,validBillingUrl};if(window.ParkopsContingency)window.ParkopsContingency.version=V;
+})();
+</script>
+<!-- parkops-v1.6.1.js -->
+<script>
+(()=>{
+'use strict';
+const V='1.6.1',TYPES=['carro','moto','bicicleta','patineta'];
+const LABEL={carro:'Carros',moto:'Motos',bicicleta:'Bicicletas',patineta:'Patinetas'};
+function esc161(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function saveCfg(){if(typeof sCfg==='function')sCfg();if(typeof refrescar==='function')refrescar();}
+function toast161(msg,type='ok'){if(typeof avisar==='function')avisar(msg,type);}
+function validUrl161(u){if(!u)return false;try{const x=new URL(u);return x.protocol==='https:'||x.protocol==='http:'}catch{return false}}
+function ensure(){if(typeof cfg==='undefined')return false;cfg.capacity=Object.assign({enabled:false,carro:0,moto:0,bicicleta:0,patineta:0},cfg.capacity||{});cfg.billing=Object.assign({enabled:false,provider:'',url:'',buttonText:'FACTURA ELECTRÓNICA',mode:'external_url'},cfg.billing||{});return true;}
+function capCard(t){const value=Math.max(0,+cfg.capacity[t]||0);return `<div class="parkops-config-card" style="border:1px solid var(--linea);border-radius:14px;padding:14px;background:var(--tarjeta,#1c2128)"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><div><b>${LABEL[t]}</b><div class="nota">Capacidad máxima disponible para ${LABEL[t].toLowerCase()}.</div></div><input data-cap161="${t}" type="number" inputmode="numeric" min="0" step="1" value="${value}" style="width:100px;padding:10px;border-radius:9px"></div></div>`;}
+function render(){if(!ensure())return;const view=document.getElementById('v-ajustes');if(!view)return;document.getElementById('parkops-capacity-settings')?.remove();document.getElementById('parkops-config161')?.remove();const wrap=document.createElement('div');wrap.id='parkops-config161';wrap.innerHTML=`<details class="acordeon" open><summary>Capacidad por tipo de vehículo</summary><div class="cuerpo"><label class="switch"><input id="capEnabled161" type="checkbox" ${cfg.capacity.enabled?'checked':''}><span class="txt">Habilitar control de capacidad</span></label><p class="nota">Configura cada objeto de forma independiente. Funciona como una configuración operativa: puedes activar el control y definir los cupos de cada tipo.</p><div style="display:grid;gap:10px;margin:12px 0">${TYPES.map(capCard).join('')}</div><button class="btn" id="btnCap161">GUARDAR CAPACIDADES</button></div></details><details class="acordeon"><summary>Facturación electrónica</summary><div class="cuerpo"><label class="switch"><input id="billEnabled161" type="checkbox" ${cfg.billing.enabled?'checked':''}><span class="txt">Habilitar botón de factura electrónica</span></label><div class="campo"><label>Proveedor</label><input id="billProvider161" value="${esc161(cfg.billing.provider||'')}" placeholder="Ej. Siigo, Alegra, proveedor propio"></div><div class="campo"><label>URL del facturador</label><input id="billUrl161" type="url" value="${esc161(cfg.billing.url||'')}" placeholder="https://..."></div><div class="campo"><label>Texto del botón</label><input id="billText161" value="${esc161(cfg.billing.buttonText||'FACTURA ELECTRÓNICA')}"></div><button class="btn" id="btnBill161">GUARDAR FACTURACIÓN</button></div></details>`;view.appendChild(wrap);
+wrap.querySelector('#btnCap161').onclick=()=>{cfg.capacity.enabled=wrap.querySelector('#capEnabled161').checked;wrap.querySelectorAll('[data-cap161]').forEach(i=>cfg.capacity[i.dataset.cap161]=Math.max(0,Math.floor(+i.value||0)));saveCfg();toast161('Capacidades guardadas correctamente');};
+wrap.querySelector('#btnBill161').onclick=()=>{const enabled=wrap.querySelector('#billEnabled161').checked,url=wrap.querySelector('#billUrl161').value.trim();if(enabled&&!validUrl161(url)){toast161('URL de facturación inválida. Debe iniciar por https:// o http://','err');return}cfg.billing={enabled,provider:wrap.querySelector('#billProvider161').value.trim(),url,buttonText:wrap.querySelector('#billText161').value.trim()||'FACTURA ELECTRÓNICA',mode:'external_url'};saveCfg();toast161('Facturación electrónica guardada');};
+}
+function init(){if(!ensure())return;render();const mo=new MutationObserver(()=>{if(!document.getElementById('parkops-config161'))render()});mo.observe(document.documentElement,{childList:true,subtree:true});window.ParkopsSettings161={version:V,render};}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+<!-- parkops-v1.6.2.js -->
+<script>
+(()=>{
+'use strict';
+const V='1.6.2';
+const MODES={minutos:'Por minutos',dia:'Tarifa plena todo el día',noche:'Tarifa plena toda la noche'};
+function toast(m,t='ok'){if(typeof avisar==='function')avisar(m,t)}
+function normSpace(v){return String(v||'').trim().toUpperCase().replace(/\s+/g,' ')}
+function occupiedSpace(space,exclude){const s=normSpace(space);return ingresos.find(r=>r.id!==exclude&&r.occupiesSlot!==false&&!r.salida&&normSpace(r.parkingSpace)===s)}
+function ensureCfg(){if(typeof cfg==='undefined')return false;cfg.billing=Object.assign({enabled:false,provider:'',url:'',buttonText:'FACTURA ELECTRÓNICA',mode:'external_url'},cfg.billing||{});return true}
+function validUrl(u){try{const x=new URL(u);return x.protocol==='https:'||x.protocol==='http:'}catch{return false}}
+function addEntryFields(){const placa=document.getElementById('inPlaca');if(!placa||document.getElementById('parkingSpace162'))return;const host=placa.closest('.campo')||placa.parentElement;if(!host)return;const block=document.createElement('div');block.id='entryExtra162';block.innerHTML=`<div class="campo"><label>N.º de parqueadero / espacio físico *</label><input id="parkingSpace162" autocomplete="off" placeholder="Ej. 114, 235, M-12"><div id="spaceStatus162" class="nota">Debe indicar el espacio físico que ocupará.</div></div><div class="campo"><label>Modalidad de tarifa *</label><div style="display:grid;gap:8px"><label><input type="radio" name="tariffMode162" value="minutos" checked> Por minutos</label><label><input type="radio" name="tariffMode162" value="dia"> Tarifa plena todo el día</label><label><input type="radio" name="tariffMode162" value="noche"> Tarifa plena toda la noche</label></div></div>`;host.insertAdjacentElement('afterend',block);const inp=block.querySelector('#parkingSpace162'),st=block.querySelector('#spaceStatus162');const check=()=>{const s=normSpace(inp.value);if(!s){st.textContent='Debe indicar el espacio físico que ocupará.';return}const r=occupiedSpace(s);st.textContent=r?`OCUPADO por ${r.placa||'otro vehículo'} · no puede asignarse`:`DISPONIBLE · ${s}`;st.style.fontWeight='700';st.style.color=r?'#ff6b6b':'#4ade80'};inp.addEventListener('input',check);inp.addEventListener('blur',check)}
+const prevRegister=registrarEntrada;registrarEntrada=function(enviar){addEntryFields();const inp=document.getElementById('parkingSpace162');if(!inp)return prevRegister(enviar);const space=normSpace(inp.value),mode=document.querySelector('input[name="tariffMode162"]:checked')?.value||'minutos';if(!space){toast('Debes ingresar el N.º de parqueadero / espacio físico','err');inp.focus();return}const busy=occupiedSpace(space);if(busy){toast(`El parqueadero ${space} está OCUPADO por ${busy.placa||'otro vehículo'}. Debes asignar otro espacio.`,'err');inp.focus();return}const before=new Set(ingresos.map(r=>r.id));prevRegister(enviar);const reg=ingresos.find(r=>!before.has(r.id));if(!reg)return;reg.parkingSpace=space;reg.tariffMode=mode;reg.tariffModeLabel=MODES[mode];reg.occupiesSlot=true;sIng();toast(`Ingreso registrado · Parqueadero ${space} · ${MODES[mode]}`,'ok');inp.value='';document.querySelector('input[name="tariffMode162"][value="minutos"]')?.click();if(typeof refrescar==='function')refrescar()};
+const prevReceipt=datosRecibo;datosRecibo=function(reg,liq){const d=prevReceipt(reg,liq);d.parqueadero=reg.parkingSpace||'—';d.modalidadTarifa=reg.tariffModeLabel||MODES[reg.tariffMode]||'Por minutos';d.vehiculo=`${d.vehiculo} · Parqueadero ${d.parqueadero} · ${d.modalidadTarifa}`;return d};
+const prevCard=tarjetaAuto;tarjetaAuto=function(i){const raw=prevCard(i),x=`<span class="chip" style="margin-left:5px">Puesto ${i.parkingSpace||'—'}</span><span class="chip" style="margin-left:5px">${MODES[i.tariffMode]||'Por minutos'}</span>`;return raw.replace('</div></div>',`${x}</div></div>`)};
+function billingButton(card,reg){if(!ensureCfg()||!cfg.billing.enabled||!validUrl(cfg.billing.url)||card.querySelector('#btnFacturaElectronica162'))return;const b=document.createElement('button');b.className='btn sec';b.id='btnFacturaElectronica162';b.textContent=cfg.billing.buttonText||'FACTURA ELECTRÓNICA';b.onclick=()=>{if(reg.status!=='LIQUIDADO'&&!reg.salida){toast('Primero debes liquidar la salida antes de facturar','err');return}if(window.AndroidBridge?.openExternalUrl)window.AndroidBridge.openExternalUrl(cfg.billing.url);else location.href=cfg.billing.url};card.appendChild(b)}
+const prevShow=mostrarLiquidacion;mostrarLiquidacion=function(id,simMin){prevShow(id,simMin);const reg=ingresos.find(r=>r.id===id),panel=document.getElementById('panelLiq'),card=panel?.querySelector('.tarjeta');if(!reg||!card)return;let info=card.querySelector('#parkingInfo162');if(!info){info=document.createElement('div');info.id='parkingInfo162';info.className='nota';info.style.margin='10px 0';card.appendChild(info)}info.innerHTML=`<b>Parqueadero:</b> ${reg.parkingSpace||'—'} · <b>Tarifa:</b> ${MODES[reg.tariffMode]||'Por minutos'}`;billingButton(card,reg)};
+function enhanceBillingSettings(){if(!ensureCfg())return;const view=document.getElementById('v-ajustes');if(!view||document.getElementById('billingNote162'))return;const details=[...view.querySelectorAll('details')].find(x=>x.textContent.includes('Facturación electrónica'));if(!details)return;const body=details.querySelector('.cuerpo')||details;const n=document.createElement('div');n.id='billingNote162';n.className='nota';n.style.margin='10px 0';n.innerHTML='<b>Datos del parqueadero · Facturación electrónica:</b> configura aquí el proveedor y su vínculo. Durante la salida, después de liquidar, el botón FACTURA ELECTRÓNICA abrirá este portal.';body.insertBefore(n,body.firstChild)}
+function init(){addEntryFields();enhanceBillingSettings();const mo=new MutationObserver(()=>{addEntryFields();enhanceBillingSettings()});mo.observe(document.documentElement,{childList:true,subtree:true});window.ParkopsPhysicalSpace={version:V,occupiedSpace,normSpace,modes:MODES}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+<!-- parkops-v1.6.3.js -->
+<script>
+(()=>{
+'use strict';
+const V='1.6.3',MODES={minutos:'POR MINUTOS',dia:'TARIFA PLENA DÍA',noche:'TARIFA PLENA NOCHE',cortesia:'CORTESÍA · SIN COBRO'};
+function toast(m,t='ok'){if(typeof avisar==='function')avisar(m,t)}
+function normSpace(v){return String(v||'').trim().toUpperCase().replace(/\s+/g,' ')}
+function busy(space){const s=normSpace(space);return ingresos.find(r=>r.occupiesSlot!==false&&!r.salida&&normSpace(r.parkingSpace)===s)}
+function installEntryPanel(){const placa=document.getElementById('inPlaca');if(!placa)return;document.getElementById('entryExtra162')?.remove();document.getElementById('entryExtra163')?.remove();const host=placa.closest('.campo')||placa.parentElement;if(!host)return;const x=document.createElement('section');x.id='entryExtra163';x.className='tarjeta';x.style.cssText='margin:12px 0;border:2px solid #2f81f7;padding:14px;border-radius:14px';x.innerHTML=`<h3 style="margin:0 0 12px">ASIGNACIÓN Y TARIFA DEL INGRESO</h3><div class="campo"><label><b>N.º DE PARQUEADERO / ESPACIO *</b></label><input id="parkingSpace163" autocomplete="off" placeholder="Ej. 114, 235, M-12" style="font-size:18px"><div id="spaceStatus163" class="nota">Digite el espacio físico que ocupará.</div></div><div class="campo"><label><b>¿CÓMO SE COBRA ESTE INGRESO?</b></label><select id="tariffMode163" style="width:100%;padding:13px;font-size:16px;border-radius:10px"><option value="minutos">POR MINUTOS</option><option value="dia">TARIFA PLENA · TODO EL DÍA</option><option value="noche">TARIFA PLENA · TODA LA NOCHE</option><option value="cortesia">CORTESÍA · SIN COBRO</option></select><div id="tariffHelp163" class="nota">El valor se calculará por permanencia.</div></div><label style="display:flex;gap:10px;align-items:center;padding:12px;border:1px solid var(--linea);border-radius:10px"><input id="courtesy163" type="checkbox" style="width:22px;height:22px"><span><b>MARCAR COMO CORTESÍA</b><br><span class="nota">Ocupa un espacio y cuenta en la ocupación, pero nunca genera cobro.</span></span></label><div class="campo" id="courtesyReasonWrap163" style="display:none;margin-top:10px"><label>Motivo / persona autorizada</label><input id="courtesyReason163" placeholder="Ej. Administrador, operario, cortesía autorizada"></div>`;host.insertAdjacentElement('afterend',x);
+const inp=x.querySelector('#parkingSpace163'),st=x.querySelector('#spaceStatus163'),sel=x.querySelector('#tariffMode163'),ck=x.querySelector('#courtesy163'),rw=x.querySelector('#courtesyReasonWrap163'),help=x.querySelector('#tariffHelp163');
+const check=()=>{const s=normSpace(inp.value),r=s?busy(s):null;st.textContent=!s?'Digite el espacio físico que ocupará.':r?`OCUPADO por ${r.placa||'otro ingreso'} · NO SE PUEDE ASIGNAR`:`DISPONIBLE · ${s}`;st.style.fontWeight='800';st.style.color=r?'#ff6b6b':s?'#4ade80':''};
+const mode=()=>{const courtesy=ck.checked||sel.value==='cortesia';ck.checked=courtesy;if(courtesy)sel.value='cortesia';rw.style.display=courtesy?'block':'none';help.textContent=courtesy?'SIN COBRO · sí ocupa cupo hasta marcar salida':sel.value==='minutos'?'Cobro según tiempo de permanencia':sel.value==='dia'?'Se aplicará la tarifa plena de día':'Se aplicará la tarifa plena de noche'};
+inp.addEventListener('input',check);sel.addEventListener('change',mode);ck.addEventListener('change',()=>{if(ck.checked)sel.value='cortesia';else if(sel.value==='cortesia')sel.value='minutos';mode()});mode()}
+const oldRegister=registrarEntrada;registrarEntrada=function(enviar){if(!document.getElementById('entryExtra163'))installEntryPanel();const inp=document.getElementById('parkingSpace163'),sel=document.getElementById('tariffMode163'),ck=document.getElementById('courtesy163');if(!inp||!sel)return oldRegister(enviar);const space=normSpace(inp.value),courtesy=ck.checked||sel.value==='cortesia',mode=courtesy?'cortesia':sel.value;if(!space){toast('Debes asignar el N.º de parqueadero antes de registrar','err');inp.focus();return}const r=busy(space);if(r){toast(`El parqueadero ${space} está ocupado por ${r.placa||'otro ingreso'}`,'err');inp.focus();return}const before=new Set(ingresos.map(r=>r.id));oldRegister(enviar);const reg=ingresos.find(r=>!before.has(r.id));if(!reg)return;reg.parkingSpace=space;reg.tariffMode=mode;reg.tariffModeLabel=MODES[mode];reg.isCourtesy=courtesy;reg.courtesyReason=courtesy?(document.getElementById('courtesyReason163')?.value.trim()||'Cortesía'):'';reg.occupiesSlot=true;if(courtesy){reg.valor=0;reg.valorParqueo=0;reg.valorRecarga=0}if(typeof sIng==='function')sIng();toast(`Ingreso ${reg.placa} · ${space} · ${MODES[mode]}`,'ok');installEntryPanel();if(typeof refrescar==='function')refrescar()};
+const oldReceipt=datosRecibo;datosRecibo=function(reg,liq){const d=oldReceipt(reg,liq);d.parqueadero=reg.parkingSpace||'—';d.modalidad=MODES[reg.tariffMode]||'POR MINUTOS';d.cortesia=reg.isCourtesy?'SÍ · SIN COBRO':'NO';if(reg.isCourtesy){d.total='$ 0';d.valor='$ 0';d.parqueo='$ 0';d.recarga='$ 0';d.modalidad=`CORTESÍA · SIN COBRO${reg.courtesyReason?' · '+reg.courtesyReason:''}`}d.vehiculo=`${d.vehiculo} · Puesto ${d.parqueadero} · ${d.modalidad}`;return d};
+const oldLiquidar=liquidar;liquidar=function(entrada,fin,tipo,placa,electrico,kwh){const reg=ingresos.find(r=>r.placa===placa&&!r.salida);if(reg?.isCourtesy){const min=Math.max(0,Math.ceil((fin-entrada)/60000));return{total:0,parqueo:0,recarga:0,min,lineas:[`CORTESÍA · SIN COBRO${reg.courtesyReason?' · '+reg.courtesyReason:''}`],mens:false,cortesia:true}}return oldLiquidar(entrada,fin,tipo,placa,electrico,kwh)};
+const oldCard=tarjetaAuto;tarjetaAuto=function(i){const raw=oldCard(i),badge=`<span class="chip" style="margin-left:5px">Puesto ${i.parkingSpace||'—'}</span><span class="chip" style="margin-left:5px;${i.isCourtesy?'background:#22c55e;color:#08130b;font-weight:800':''}">${i.isCourtesy?'CORTESÍA · $0':(MODES[i.tariffMode]||'POR MINUTOS')}</span>`;return raw.replace('</div></div>',`${badge}</div></div>`)};
+const oldShow=mostrarLiquidacion;mostrarLiquidacion=function(id,simMin){oldShow(id,simMin);const reg=ingresos.find(r=>r.id===id),panel=document.getElementById('panelLiq');if(!reg||!panel)return;if(reg.isCourtesy){const tot=panel.querySelector('.tot');if(tot)tot.textContent=typeof pesos==='function'?pesos(0):'$ 0';const det=panel.querySelector('.det');if(det)det.innerHTML=`· <b>CORTESÍA · SIN COBRO</b><br>· ${reg.courtesyReason||'Cortesía autorizada'}<br>· Parqueadero ${reg.parkingSpace||'—'} continúa ocupado hasta marcar salida`;const medio=panel.querySelector('#medioPago');if(medio){medio.disabled=true;medio.title='Las cortesías no requieren medio de pago'}}};
+function init(){installEntryPanel();const mo=new MutationObserver(()=>{if(document.getElementById('inPlaca')&&!document.getElementById('entryExtra163'))installEntryPanel()});mo.observe(document.documentElement,{childList:true,subtree:true});window.ParkopsEntry163={version:V,modes:MODES,busy}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+<!-- parkops-v1.6.4.js -->
+<script>
+(()=>{'use strict';
+const V='1.6.4',MODES={minutos:'POR MINUTOS',dia:'TARIFA PLENA DÍA',noche:'TARIFA PLENA NOCHE',mensualidad:'MENSUALIDAD',cortesia:'CORTESÍA · SIN COBRO'};
+const $=s=>document.querySelector(s);function toast(m,t='ok'){if(typeof avisar==='function')avisar(m,t)}function norm(v){return String(v||'').trim().toUpperCase().replace(/\s+/g,' ')}
+function ensure(){cfg.capacity=Object.assign({enabled:false,carro:0,moto:0,bicicleta:0,patineta:0,recarga:0},cfg.capacity||{});return true}
+function occupied(space){let s=norm(space);return ingresos.find(r=>!r.salida&&r.occupiesSlot!==false&&norm(r.parkingSpace)===s)}
+function monthlyActive(plate){try{return !!mensVigente(norm(plate))}catch{return false}}
+function mountEntry(){const plate=$('#placa');if(!plate)return;$('#entryExtra162')?.remove();$('#entryExtra163')?.remove();$('#entryExtra164')?.remove();const tipos=$('#tipos'),anchor=tipos||plate.closest('.placa-wrap');if(!anchor)return;const el=document.createElement('div');el.id='entryExtra164';el.className='tarjeta';el.style.cssText='margin:14px 0;padding:14px;border:2px solid var(--ambar);border-radius:14px';el.innerHTML=`<h2 style="margin:0 0 12px">Ubicación y modalidad de cobro</h2><div class="campo"><label for="parkingSpace164"><b>N.º DE PARQUEADERO / PUESTO *</b></label><input id="parkingSpace164" type="text" inputmode="text" autocomplete="off" placeholder="Ej. 114, 235, M-12" style="font-size:18px"><div id="spaceStatus164" class="nota">Obligatorio. Indique el puesto físico donde queda estacionado.</div></div><div class="campo"><label for="tariffMode164"><b>MODALIDAD DEL INGRESO *</b></label><select id="tariffMode164" style="width:100%;padding:13px;font-size:16px;border-radius:10px"><option value="minutos">POR MINUTOS</option><option value="dia">TARIFA PLENA · TODO EL DÍA</option><option value="noche">TARIFA PLENA · TODA LA NOCHE</option><option value="mensualidad">MENSUALIDAD</option><option value="cortesia">CORTESÍA · SIN COBRO</option></select><div id="modeHelp164" class="nota"></div></div><div class="campo" id="courtesyWrap164" hidden><label>Motivo de cortesía</label><input id="courtesyReason164" placeholder="Administrador, operario, autorización…"></div><div id="evAvailability164" class="nota" style="padding:10px;border:1px solid var(--linea);border-radius:9px"></div>`;anchor.insertAdjacentElement('afterend',el);
+const ps=$('#parkingSpace164'),ss=$('#spaceStatus164'),sel=$('#tariffMode164'),help=$('#modeHelp164');function check(){const s=norm(ps.value),r=s&&occupied(s);ss.textContent=!s?'Obligatorio. Indique el puesto físico donde queda estacionado.':r?`OCUPADO por ${r.placa||'otro vehículo'} · no se puede asignar`:`DISPONIBLE · ${s}`;ss.style.color=r?'var(--rojo)':s?'var(--verde)':''}function mode(){const m=sel.value,active=monthlyActive(plate.value);$('#courtesyWrap164').hidden=m!=='cortesia';help.textContent=m==='mensualidad'?(active?'Mensualidad activa detectada para esta placa.':'ATENCIÓN: no se detecta mensualidad vigente para esta placa.'):m==='cortesia'?'Sin cobro; sí ocupa un puesto hasta la salida física.':m==='minutos'?'Liquidación por tiempo de permanencia.':m==='dia'?'Aplicar tarifa plena de día.':'Aplicar tarifa plena de noche.';help.style.color=m==='mensualidad'&&!active?'var(--rojo)':'';renderEV()}ps.oninput=check;sel.onchange=mode;plate.addEventListener('input',mode);mode()}
+function renderEV(){ensure();const box=$('#evAvailability164');if(!box)return;const cap=Math.max(0,+cfg.capacity.recarga||0),used=ingresos.filter(r=>!r.salida&&r.occupiesSlot!==false&&r.electrico).length;const h=`<b>Cupos de recarga eléctrica:</b> ${used} ocupados / ${cap} configurados / <b>${Math.max(cap-used,0)} disponibles</b>`;if(box.innerHTML!==h)box.innerHTML=h}
+function mountEVConfig(){ensure();const view=$('#v-ajustes');if(!view||$('#evCapacity164'))return;const capBtn=$('#btnCap161');if(!capBtn)return;const d=document.createElement('div');d.id='evCapacity164';d.className='parkops-config-card';d.style.cssText='border:1px solid var(--linea);border-radius:14px;padding:14px;margin:10px 0';d.innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><div><b>Recarga eléctrica</b><div class="nota">Número de puestos físicos habilitados para cargar vehículos eléctricos.</div></div><input id="capRecarga164" type="number" min="0" step="1" inputmode="numeric" value="${Math.max(0,+cfg.capacity.recarga||0)}" style="width:100px;padding:10px"></div>`;capBtn.parentElement.insertBefore(d,capBtn);capBtn.addEventListener('click',()=>{cfg.capacity.recarga=Math.max(0,Math.floor(+$('#capRecarga164').value||0));if(typeof sCfg==='function')sCfg();renderEV()})}
+const prevRegister=registrarEntrada;registrarEntrada=function(enviar){if(!$('#parkingSpace164'))mountEntry();const ps=$('#parkingSpace164'),sel=$('#tariffMode164');if(!ps||!sel){toast('No se pudo cargar el módulo de ubicación y tarifa','err');return}const space=norm(ps.value),mode=sel.value,plate=norm($('#placa').value);if(!space){toast('Ingrese el N.º de parqueadero / puesto','err');ps.focus();return}const occ=occupied(space);if(occ){toast(`El puesto ${space} está ocupado por ${occ.placa}`,'err');ps.focus();return}if(mode==='mensualidad'&&!monthlyActive(plate)){toast('La placa no tiene una mensualidad vigente. Seleccione otra modalidad.','err');sel.focus();return}if($('#chkElectrico')?.checked){ensure();const cap=Math.max(0,+cfg.capacity.recarga||0),used=ingresos.filter(r=>!r.salida&&r.occupiesSlot!==false&&r.electrico).length;if(cap<=0||used>=cap){toast('No hay cupos de recarga eléctrica disponibles','err');return}}
+const before=new Set(ingresos.map(r=>r.id));prevRegister(enviar);const reg=ingresos.find(r=>!before.has(r.id));if(!reg)return;reg.parkingSpace=space;reg.tariffMode=mode;reg.tariffModeLabel=MODES[mode];reg.isCourtesy=mode==='cortesia';reg.courtesyReason=reg.isCourtesy?($('#courtesyReason164')?.value.trim()||'Cortesía autorizada'):'';reg.isMonthly=mode==='mensualidad';reg.occupiesSlot=true;if(reg.isCourtesy||reg.isMonthly){reg.valor=0;reg.valorParqueo=0}if(typeof sIng==='function')sIng();toast(`Ingreso ${reg.placa} · Puesto ${space} · ${MODES[mode]}`,'ok');mountEntry();if(typeof refrescar==='function')refrescar()};
+const prevLiquidar=liquidar;liquidar=function(entrada,fin,tipo,placa,electrico,kwh){const r=ingresos.find(x=>x.placa===placa&&!x.salida);if(r?.isCourtesy||r?.isMonthly){const min=Math.max(0,Math.ceil((fin-entrada)/60000)),txt=r.isCourtesy?`CORTESÍA · SIN COBRO${r.courtesyReason?' · '+r.courtesyReason:''}`:'MENSUALIDAD · SIN COBRO DE PARQUEO';let rec=0;if(electrico&&kwh&&!r.isCourtesy){try{const base=prevLiquidar(entrada,fin,tipo,placa,electrico,kwh);rec=base.valorRecarga??base.recarga??0}catch{}}return{total:rec,parqueo:0,valorParqueo:0,recarga:rec,valorRecarga:rec,min,lineas:[txt],mens:r.isMonthly,cortesia:r.isCourtesy}}return prevLiquidar(entrada,fin,tipo,placa,electrico,kwh)};
+function init(){ensure();mountEntry();mountEVConfig();renderEV();const mo=new MutationObserver(()=>{if($('#placa')&&!$('#parkingSpace164'))mountEntry();mountEVConfig();renderEV()});mo.observe(document.documentElement,{childList:true,subtree:true});window.Parkops164={version:V,occupied,monthlyActive}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();})();
+</script>
+<!-- parkops-v1.6.6.js -->
+<script>
+/* ============================================================================
+   PARKOPS · SOLVEX SYSTEM JB S.A.S.
+   Parche v1.6.6 — Servicios adicionales, observaciones e IVA
+
+   Sustituye a v1.6.5 (nunca instalada). Cambios frente a ella:
+   · Los valores de casco y baño y la configuración de IVA viven ahora DENTRO
+     del acordeón "Tarifas de parqueo", que es donde corresponden. Se guardan
+     con el mismo botón de reglas. Ya no existe el acordeón suelto del final.
+   · En el formulario de ingreso, el valor de cada servicio NO se muestra
+     mientras la casilla esté sin marcar. Aparece al activarla y desaparece
+     al desactivarla. Igual en la pantalla de cobro.
+
+   Funciones que aporta sobre 1.6.4:
+   1. Ingreso: casillas "DEJA CASCO EN CUSTODIA" y "USA BAÑO" + campo
+      OBSERVACIONES (texto libre, multilínea).
+   2. Tarifas: valor de casco, valor de baño e IVA (activar, tarifa %, y si
+      los precios ya lo incluyen o si se suma al final).
+   3. Liquidación y recibo: los servicios se suman al total, el IVA se
+      discrimina en línea aparte y las observaciones viajan en el recibo.
+   4. En la pantalla de cobro se pueden marcar/desmarcar los servicios y
+      editar las observaciones antes de confirmar la salida.
+
+   Todo se guarda en cfg (localStorage) y entra automáticamente en el
+   respaldo JSON existente. No toca el licenciamiento ni el backend.
+   ========================================================================== */
+(() => {
+'use strict';
+
+const V = '1.6.6';
+
+/* ── utilidades locales ─────────────────────────────────────────────────── */
+const $  = s => document.querySelector(s);
+const esc = v => String(v == null ? '' : v)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const money = n => (typeof pesos === 'function')
+  ? pesos(n) : '$' + Math.round(n || 0).toLocaleString('es-CO');
+function toast(m, t = 'ok'){ if (typeof avisar === 'function') avisar(m, t); }
+const num = (v, d = 0) => { const n = Number(v); return Number.isFinite(n) ? n : d; };
+
+/* ── configuración: valores por defecto y saneamiento ───────────────────── */
+const SERVICIOS_BASE = { cascoOn:true, cascoValor:0, cascoEtq:'Custodia de casco',
+                         banoOn:true,  banoValor:0,  banoEtq:'Uso de baño' };
+const IVA_BASE       = { enabled:false, tasa:19, incluido:false };
+
+function ensure(){
+  if (typeof cfg !== 'object' || !cfg) return null;
+  cfg.servicios = Object.assign({}, SERVICIOS_BASE, cfg.servicios || {});
+  cfg.iva       = Object.assign({}, IVA_BASE,       cfg.iva       || {});
+  cfg.servicios.cascoValor = Math.max(0, Math.round(num(cfg.servicios.cascoValor)));
+  cfg.servicios.banoValor  = Math.max(0, Math.round(num(cfg.servicios.banoValor)));
+  cfg.iva.tasa = Math.min(100, Math.max(0, num(cfg.iva.tasa, 19)));
+  return cfg;
+}
+function guardar(){ if (typeof sCfg === 'function') sCfg(); }
+
+/* ── motor de cálculo ───────────────────────────────────────────────────── */
+function valorCasco(){ ensure(); return cfg.servicios.cascoOn ? cfg.servicios.cascoValor : 0; }
+function valorBano (){ ensure(); return cfg.servicios.banoOn  ? cfg.servicios.banoValor  : 0; }
+
+/** Servicios adicionales cobrados a un registro. */
+function servicios(reg){
+  ensure();
+  const l = []; let valor = 0;
+  if (!reg) return { valor:0, lineas:l };
+  if (reg.casco && cfg.servicios.cascoOn){
+    const v = cfg.servicios.cascoValor;
+    valor += v;
+    l.push(`${cfg.servicios.cascoEtq}: ${v ? money(v) : 'sin costo'}`);
+  }
+  if (reg.bano && cfg.servicios.banoOn){
+    const v = cfg.servicios.banoValor;
+    valor += v;
+    l.push(`${cfg.servicios.banoEtq}: ${v ? money(v) : 'sin costo'}`);
+  }
+  return { valor, lineas:l };
+}
+
+/**
+ * Aplica IVA sobre una base.
+ *  - modo "incluido": el valor cobrado no cambia; se discrimina base e impuesto.
+ *  - modo "adicional": el impuesto se suma al valor cobrado.
+ */
+function aplicarIVA(base){
+  ensure();
+  const t = cfg.iva.tasa / 100;
+  if (!cfg.iva.enabled || t <= 0 || base <= 0)
+    return { total:base, iva:0, neto:base, lineas:[] };
+  if (cfg.iva.incluido){
+    const neto = base / (1 + t), iva = base - neto;
+    return { total:base, iva, neto, lineas:[
+      `Base gravable: ${money(neto)}`,
+      `IVA ${cfg.iva.tasa}% incluido: ${money(iva)}`
+    ]};
+  }
+  const iva = base * t;
+  return { total:base + iva, iva, neto:base, lineas:[
+    `Subtotal: ${money(base)}`,
+    `IVA ${cfg.iva.tasa}%: ${money(iva)}`
+  ]};
+}
+
+/** Toma la liquidación base y le suma servicios, IVA, redondeo y observaciones. */
+function decorar(base, reg){
+  ensure();
+  const out = Object.assign({}, base);
+  out.lineas = (base.lineas || []).slice();
+
+  // La cortesía no cobra parqueo ni servicios.
+  const sv = (reg && reg.isCourtesy) ? { valor:0, lineas:[] } : servicios(reg);
+  sv.lineas.forEach(l => out.lineas.push(l));
+
+  const subtotal = Math.max(0, num(base.total)) + sv.valor;
+  const iv = aplicarIVA(subtotal);
+  iv.lineas.forEach(l => out.lineas.push(l));
+
+  const rd = Math.max(1, Math.round(num(cfg.redondeo, 1)));
+  const total = Math.ceil(iv.total / rd) * rd;
+  if (rd > 1 && total !== Math.round(iv.total))
+    out.lineas.push(`Redondeo a ${money(rd)}: ${money(total)}`);
+
+  const obs = (reg && (reg.observaciones || reg.obs)) || '';
+  if (obs) out.lineas.push(`Observaciones: ${obs}`);
+
+  out.total          = total;
+  out.servicios      = sv.valor;
+  out.valorServicios = sv.valor;
+  out.iva            = iv.iva;
+  out.valorIva       = iv.iva;
+  out.baseGravable   = iv.neto;
+  out.observaciones  = obs;
+  return out;
+}
+
+function activo(placa){
+  try { return ingresos.find(r => r.placa === placa && !r.salida) || null; }
+  catch { return null; }
+}
+
+/* ── formulario de ingreso ──────────────────────────────────────────────── */
+let pendiente = { casco:false, bano:false, obs:'' };
+
+function anclaIngreso(){
+  const vista = $('#v-ingreso'); if (!vista) return null;
+  const extra164 = $('#entryExtra164'); if (extra164) return extra164;
+  const obs = $('#obs'); if (obs) return obs.closest('.fila') || obs.closest('.campo');
+  return $('#tipos');
+}
+
+function mountEntry(){
+  ensure();
+  if (!$('#v-ingreso') || $('#svc166')) return;
+  const ancla = anclaIngreso(); if (!ancla) return;
+
+  // La antigua "Nota" de una línea queda reemplazada por OBSERVACIONES.
+  const viejo = $('#obs');
+  if (viejo){ const c = viejo.closest('.campo'); if (c) c.style.display = 'none'; }
+
+  const el = document.createElement('div');
+  el.id = 'svc166';
+  el.className = 'tarjeta';
+  el.style.cssText = 'margin:14px 0;padding:14px;border:2px solid var(--linea);border-radius:14px';
+  el.innerHTML = `
+    <h2 style="margin:0 0 10px">Servicios adicionales y observaciones</h2>
+    <label class="nota" style="display:flex;gap:10px;align-items:center;text-transform:none;font-size:14px;margin-bottom:10px;cursor:pointer">
+      <input type="checkbox" id="chkCasco166" style="width:22px;height:22px;flex:none">
+      <span><b>DEJA CASCO EN CUSTODIA</b><span id="lblCasco166"></span></span>
+    </label>
+    <label class="nota" style="display:flex;gap:10px;align-items:center;text-transform:none;font-size:14px;margin-bottom:12px;cursor:pointer">
+      <input type="checkbox" id="chkBano166" style="width:22px;height:22px;flex:none">
+      <span><b>USA BAÑO</b><span id="lblBano166"></span></span>
+    </label>
+    <div class="campo">
+      <label for="obs166">Observaciones</label>
+      <textarea id="obs166" rows="3" placeholder="Estado del vehículo, accesorios, novedades, autorizaciones…"
+        style="width:100%;padding:12px;font-size:15px;border-radius:10px;border:1px solid var(--linea);font-family:inherit;resize:vertical"></textarea>
+      <div class="nota">Queda guardada en el registro y se imprime en el recibo.</div>
+    </div>
+    <div id="svcTotal166" class="nota" hidden
+      style="padding:9px;border:1px solid var(--linea);border-radius:9px;text-transform:none"></div>`;
+  ancla.insertAdjacentElement('afterend', el);
+
+  $('#chkCasco166').addEventListener('change', pintarEntrada);
+  $('#chkBano166').addEventListener('change', pintarEntrada);
+  pintarEntrada();
+}
+
+/**
+ * Los valores solo se muestran cuando la casilla está marcada.
+ * Sin marcar no se ve ninguna cifra.
+ */
+function pintarEntrada(){
+  if (!$('#svc166')) return;
+  ensure();
+
+  const cOn = !!$('#chkCasco166')?.checked;
+  const bOn = !!$('#chkBano166')?.checked;
+  const vc  = cOn ? valorCasco() : 0;
+  const vb  = bOn ? valorBano()  : 0;
+
+  const etiqueta = (nodo, activa, valor) => {
+    if (!nodo) return;
+    if (!activa){ nodo.textContent = ''; nodo.hidden = true; return; }
+    nodo.hidden = false;
+    nodo.innerHTML = valor
+      ? ` — <b style="color:var(--ambar)">${money(valor)}</b>`
+      : ' — <b>sin costo</b>';
+  };
+  etiqueta($('#lblCasco166'), cOn, vc);
+  etiqueta($('#lblBano166'),  bOn, vb);
+
+  const box = $('#svcTotal166'); if (!box) return;
+  const suma = vc + vb;
+  if (!cOn && !bOn){ box.hidden = true; box.innerHTML = ''; return; }
+  box.hidden = false;
+  box.innerHTML = suma > 0
+    ? `<b>Servicios adicionales:</b> ${money(suma)}${cfg.iva.enabled
+        ? (cfg.iva.incluido ? ' (IVA incluido)' : ` + IVA ${cfg.iva.tasa}%`) : ''}` +
+      ' — se cobran al liquidar la salida.'
+    : 'Servicios marcados sin costo: quedan registrados pero no suman al total.';
+}
+
+/* ── tarifas: los valores viven dentro del acordeón "Tarifas de parqueo" ─── */
+function mountTarifas(){
+  ensure();
+
+  // Limpieza: si quedó el acordeón suelto de una versión anterior, se retira.
+  document.getElementById('cfgSvc165')?.remove();
+  document.getElementById('cfgSvc166')?.remove();
+
+  const btn = $('#btnReglas');                 // botón del acordeón de tarifas
+  if (!btn || $('#svcTarifas166')) return;
+
+  const d = document.createElement('div');
+  d.id = 'svcTarifas166';
+  d.innerHTML = `
+    <div class="sep"></div>
+    <h3 style="margin:0 0 8px;font-size:15px">Servicios adicionales</h3>
+    <p class="nota" style="margin-bottom:12px;text-transform:none">
+      Se cobran una sola vez por ingreso, cuando el operario marca la casilla al registrar
+      el vehículo. Déjalos en cero si el servicio es gratuito: la casilla se sigue viendo
+      y queda registrada, pero no suma al total.</p>
+
+    <div class="fila">
+      <div class="campo">
+        <label for="sCascoValor166">Custodia de casco</label>
+        <input id="sCascoValor166" type="number" min="0" step="500" inputmode="numeric"
+          value="${cfg.servicios.cascoValor}">
+      </div>
+      <div class="campo">
+        <label for="sBanoValor166">Uso de baño</label>
+        <input id="sBanoValor166" type="number" min="0" step="500" inputmode="numeric"
+          value="${cfg.servicios.banoValor}">
+      </div>
+    </div>
+
+    <label class="nota" style="display:flex;gap:9px;align-items:flex-start;text-transform:none;font-size:13px;margin-bottom:7px">
+      <input type="checkbox" id="sCascoOn166" style="width:20px;height:20px;flex:none;margin-top:1px"
+        ${cfg.servicios.cascoOn ? 'checked' : ''}>
+      <span>Ofrecer y cobrar la custodia de casco</span></label>
+    <label class="nota" style="display:flex;gap:9px;align-items:flex-start;text-transform:none;font-size:13px">
+      <input type="checkbox" id="sBanoOn166" style="width:20px;height:20px;flex:none;margin-top:1px"
+        ${cfg.servicios.banoOn ? 'checked' : ''}>
+      <span>Ofrecer y cobrar el uso de baño</span></label>
+
+    <div class="sep"></div>
+    <h3 style="margin:0 0 8px;font-size:15px">IVA</h3>
+    <p class="legal" style="margin-bottom:12px"><b>Solo si eres responsable de IVA.</b>
+      El servicio de parqueadero está gravado a la tarifa general en Colombia, pero únicamente
+      debe liquidarlo quien tenga esa responsabilidad. Si no es tu caso, deja el interruptor
+      apagado. Verifica tu condición ante la DIAN antes de activarlo.</p>
+
+    <label class="nota" style="display:flex;gap:9px;align-items:flex-start;text-transform:none;font-size:13px;margin-bottom:10px">
+      <input type="checkbox" id="ivaOn166" style="width:20px;height:20px;flex:none;margin-top:1px"
+        ${cfg.iva.enabled ? 'checked' : ''}>
+      <span>Liquidar IVA en los recibos</span></label>
+
+    <div class="fila">
+      <div class="campo">
+        <label for="ivaTasa166">Tarifa de IVA (%)</label>
+        <input id="ivaTasa166" type="number" min="0" max="100" step="0.5" inputmode="decimal"
+          value="${cfg.iva.tasa}">
+      </div>
+      <div class="campo">
+        <label for="ivaModo166">Cómo se aplica</label>
+        <select id="ivaModo166">
+          <option value="adicional" ${cfg.iva.incluido ? '' : 'selected'}>Se suma al total</option>
+          <option value="incluido"  ${cfg.iva.incluido ? 'selected' : ''}>Ya está incluido en las tarifas</option>
+        </select>
+      </div>
+    </div>
+    <div id="ivaAyuda166" class="nota" style="text-transform:none;padding:9px;border:1px solid var(--linea);border-radius:9px"></div>`;
+
+  btn.parentElement.insertBefore(d, btn);
+  btn.textContent = 'Guardar tarifas y reglas';
+
+  const ayuda = () => {
+    const on   = $('#ivaOn166').checked;
+    const tasa = Math.min(100, Math.max(0, num($('#ivaTasa166').value, 0)));
+    const inc  = $('#ivaModo166').value === 'incluido';
+    const box  = $('#ivaAyuda166'); if (!box) return;
+    if (!on){ box.textContent = 'Los recibos no discriminan IVA. El total es el valor de las tarifas.'; return; }
+    box.innerHTML = inc
+      ? `El total no cambia. El recibo discrimina la base gravable y el <b>IVA ${tasa}% incluido</b>. Ejemplo: se cobran ${money(10000)}, de los cuales ${money(10000 - 10000/(1+tasa/100))} son IVA.`
+      : `El recibo muestra el subtotal y le <b>suma ${tasa}%</b>. Ejemplo: subtotal ${money(10000)} + IVA ${money(10000*tasa/100)} = <b>${money(10000*(1+tasa/100))}</b>.`;
+  };
+  ['#ivaOn166','#ivaTasa166','#ivaModo166'].forEach(s => {
+    const n = $(s); if (n){ n.addEventListener('change', ayuda); n.addEventListener('input', ayuda); }
+  });
+  ayuda();
+
+  // Un solo botón guarda las reglas del núcleo y estas tarifas de servicio.
+  btn.addEventListener('click', () => {
+    ensure();
+    cfg.servicios.cascoValor = Math.max(0, Math.round(num($('#sCascoValor166').value)));
+    cfg.servicios.banoValor  = Math.max(0, Math.round(num($('#sBanoValor166').value)));
+    cfg.servicios.cascoOn    = $('#sCascoOn166').checked;
+    cfg.servicios.banoOn     = $('#sBanoOn166').checked;
+    cfg.iva.enabled  = $('#ivaOn166').checked;
+    cfg.iva.tasa     = Math.min(100, Math.max(0, num($('#ivaTasa166').value, 19)));
+    cfg.iva.incluido = $('#ivaModo166').value === 'incluido';
+    guardar();
+    pintarEntrada();
+    ayuda();
+  });
+}
+
+/* ── panel de cobro: editar servicios y observaciones antes de la salida ── */
+function mountLiq(id, simMin){
+  ensure();
+  const panel = $('#panelLiq'); if (!panel || !panel.firstElementChild) return;
+  const reg = ingresos.find(i => i.id === id); if (!reg) return;
+  if (panel.querySelector('#liqSvc166')) return;
+
+  const esMens = simMin === 'mes';
+
+  // En la simulación mensual el total lo arma el núcleo sin servicios ni IVA: lo recalculamos.
+  if (esMens){
+    try {
+      const tm = tarifas[reg.tipo] || tarifas.carro;
+      const lineas = [`Mensualidad completa: ${money(tm.mes)}`];
+      let total = tm.mes, recarga = 0;
+      if (reg.electrico){
+        recarga = num(cfg.recarga && cfg.recarga.mes);
+        lineas.push(recarga ? `Recarga eléctrica ilimitada: + ${money(recarga)}`
+                            : 'Recarga eléctrica no incluida en la mensualidad');
+        total += recarga;
+      }
+      const liq = decorar({ total, parqueo:tm.mes, recarga, min:0, lineas, mens:false }, reg);
+      const caja = panel.querySelector('.liq');
+      if (caja) caja.innerHTML =
+        `<div class="tot">${money(liq.total)}</div>
+         <div class="det">${liq.lineas.map(l => '· ' + esc(l)).join('<br>')}
+         ${liq.recarga ? `<br><br>Parqueo ${money(liq.parqueo)} + recarga ${money(liq.recarga)}` : ''}</div>`;
+    } catch {}
+  }
+
+  const el = document.createElement('div');
+  el.id = 'liqSvc166';
+  el.style.cssText = 'border:1px solid var(--linea);border-radius:12px;padding:12px;margin:12px 0';
+  el.innerHTML = `
+    <b style="display:block;margin-bottom:9px">Servicios y observaciones</b>
+    <label class="nota" style="display:flex;gap:9px;align-items:center;text-transform:none;font-size:13px;margin-bottom:7px;cursor:pointer">
+      <input type="checkbox" id="liqCasco166" style="width:20px;height:20px;flex:none" ${reg.casco ? 'checked' : ''}>
+      <span>Dejó casco en custodia<span id="liqLblCasco166"></span></span></label>
+    <label class="nota" style="display:flex;gap:9px;align-items:center;text-transform:none;font-size:13px;margin-bottom:10px;cursor:pointer">
+      <input type="checkbox" id="liqBano166" style="width:20px;height:20px;flex:none" ${reg.bano ? 'checked' : ''}>
+      <span>Usó el baño<span id="liqLblBano166"></span></span></label>
+    <div class="campo" style="margin:0">
+      <label for="liqObs166">Observaciones</label>
+      <textarea id="liqObs166" rows="2" placeholder="Novedades de la salida…"
+        style="width:100%;padding:11px;font-size:14px;border-radius:10px;border:1px solid var(--linea);font-family:inherit;resize:vertical">${esc(reg.observaciones || reg.obs || '')}</textarea>
+    </div>`;
+
+  const liqBox = panel.querySelector('.liq');
+  if (liqBox) liqBox.insertAdjacentElement('afterend', el);
+  else panel.firstElementChild.appendChild(el);
+
+  // También aquí: la cifra aparece solo si la casilla está marcada.
+  const pintarLiq = () => {
+    const puesta = (nodo, activa, valor) => {
+      if (!nodo) return;
+      nodo.innerHTML = activa ? (valor ? ` · <b>${money(valor)}</b>` : ' · <b>sin costo</b>') : '';
+    };
+    puesta($('#liqLblCasco166'), $('#liqCasco166').checked, valorCasco());
+    puesta($('#liqLblBano166'),  $('#liqBano166').checked,  valorBano());
+  };
+  pintarLiq();
+
+  const aplicar = () => {
+    reg.casco = $('#liqCasco166').checked;
+    reg.bano  = $('#liqBano166').checked;
+    if (typeof sIng === 'function') sIng();
+    mostrarLiquidacion(id, simMin);
+  };
+  $('#liqCasco166').addEventListener('change', aplicar);
+  $('#liqBano166').addEventListener('change', aplicar);
+  $('#liqObs166').addEventListener('change', () => {
+    const t = $('#liqObs166').value.trim();
+    reg.observaciones = t; reg.obs = t;
+    if (typeof sIng === 'function') sIng();
+    toast('Observaciones actualizadas', 'ok');
+  });
+
+  // Al confirmar la salida, dejar el desglose guardado en el registro para la caja.
+  const btn = panel.querySelector('#btnConfirmar');
+  if (btn) btn.addEventListener('click', () => setTimeout(() => {
+    try {
+      ensure();
+      const t = cfg.iva.enabled ? cfg.iva.tasa / 100 : 0;
+      reg.valorServicios = reg.isCourtesy ? 0 : servicios(reg).valor;
+      reg.valorIva = (t > 0 && reg.valor > 0) ? reg.valor - reg.valor / (1 + t) : 0;
+      reg.baseGravable = Math.max(0, (reg.valor || 0) - reg.valorIva);
+      if (typeof sIng === 'function') sIng();
+    } catch {}
+  }, 0));
+}
+
+/* ── enganches sobre el núcleo ──────────────────────────────────────────── */
+
+/* 1. Liquidación: servicios + IVA + observaciones sobre lo que calcule 1.6.4 */
+if (typeof liquidar === 'function'){
+  const prev = liquidar;
+  liquidar = function(entrada, fin, tipo, placa, electrico, kwh){
+    const base = prev(entrada, fin, tipo, placa, electrico, kwh);
+    return decorar(base, activo(placa));
+  };
+}
+
+/* 2. Ingreso: capturar casillas y observaciones en el registro nuevo */
+if (typeof registrarEntrada === 'function'){
+  const prev = registrarEntrada;
+  registrarEntrada = function(enviar){
+    if (!$('#svc166')) mountEntry();
+    const casco = !!$('#chkCasco166')?.checked;
+    const bano  = !!$('#chkBano166')?.checked;
+    const obs   = ($('#obs166')?.value || '').trim();
+
+    // El recibo de ingreso se arma dentro de prev(): dejamos los datos accesibles.
+    pendiente = { casco, bano, obs };
+    const viejo = $('#obs'); if (viejo) viejo.value = obs;
+
+    const antes = new Set(ingresos.map(r => r.id));
+    prev(enviar);
+
+    const reg = ingresos.find(r => !antes.has(r.id));
+    pendiente = { casco:false, bano:false, obs:'' };
+    if (!reg) return;
+
+    reg.casco = casco;
+    reg.bano  = bano;
+    reg.observaciones = obs;
+    if (obs) reg.obs = obs;
+    if (typeof sIng === 'function') sIng();
+
+    if ($('#chkCasco166')) $('#chkCasco166').checked = false;
+    if ($('#chkBano166'))  $('#chkBano166').checked  = false;
+    if ($('#obs166'))      $('#obs166').value = '';
+    pintarEntrada();
+    if (typeof refrescar === 'function') refrescar();
+  };
+}
+
+/* 3. Recibos: tokens nuevos y bloque de servicios en el comprobante de ingreso */
+if (typeof datosRecibo === 'function'){
+  const prev = datosRecibo;
+  datosRecibo = function(reg, liq){
+    const d = prev(reg, liq);
+    ensure();
+    const r = reg || {};
+    const casco = (r.casco !== undefined) ? r.casco : pendiente.casco;
+    const bano  = (r.bano  !== undefined) ? r.bano  : pendiente.bano;
+    const obs   = r.observaciones || r.obs || pendiente.obs || '';
+
+    const extra = [];
+    if (casco && cfg.servicios.cascoOn)
+      extra.push(`${cfg.servicios.cascoEtq}: ${valorCasco() ? money(valorCasco()) : 'sin costo'}`);
+    if (bano && cfg.servicios.banoOn)
+      extra.push(`${cfg.servicios.banoEtq}: ${valorBano() ? money(valorBano()) : 'sin costo'}`);
+
+    d.casco         = casco ? 'SÍ' : 'NO';
+    d.bano          = bano  ? 'SÍ' : 'NO';
+    d.servicios     = extra.join('\n');
+    d.observaciones = obs;
+    d.iva           = liq ? money(liq.valorIva || 0) : '';
+    d.baseGravable  = liq ? money(liq.baseGravable || 0) : '';
+
+    // Comprobante de ingreso: se anexa al bloque de tarifa, que sí está en la plantilla.
+    if (!liq){
+      const bloque = [];
+      if (extra.length) bloque.push('*SERVICIOS ADICIONALES*\n' + extra.join('\n'));
+      if (obs)          bloque.push('*OBSERVACIONES*\n' + obs);
+      if (bloque.length) d.tarifa = (d.tarifa || '') + '\n\n' + bloque.join('\n\n');
+    }
+    return d;
+  };
+}
+
+/* 4. Texto de tarifa: solo la advertencia de IVA.
+      Los valores de los servicios NO se listan aquí; aparecen únicamente
+      cuando el servicio se toma, en el bloque SERVICIOS ADICIONALES. */
+if (typeof textoTarifa === 'function'){
+  const prev = textoTarifa;
+  textoTarifa = function(tipo, electrico){
+    let s = prev(tipo, electrico);
+    ensure();
+    if (cfg.iva.enabled)
+      s += `\n${cfg.iva.incluido ? `Tarifas con IVA ${cfg.iva.tasa}% incluido`
+                                 : `A las tarifas se les suma IVA ${cfg.iva.tasa}%`}`;
+    return s;
+  };
+}
+
+/* 5. Panel de cobro: inyectar controles después de que el núcleo lo pinte */
+if (typeof mostrarLiquidacion === 'function'){
+  const prev = mostrarLiquidacion;
+  mostrarLiquidacion = function(id, simMin){
+    prev(id, simMin);
+    try { mountLiq(id, simMin); } catch {}
+  };
+}
+
+/* ── arranque y re-montaje ──────────────────────────────────────────────── */
+function init(){
+  if (typeof cfg !== 'object' || !cfg){ setTimeout(init, 120); return; }
+  ensure();
+  mountEntry();
+  mountTarifas();
+
+  // Observador con antirrebote: no escribe si los módulos ya están montados,
+  // para no realimentar el propio MutationObserver.
+  let pend = 0;
+  const mo = new MutationObserver(() => {
+    if (pend) return;
+    if ($('#svc166') && $('#svcTarifas166')) return;
+    pend = setTimeout(() => { pend = 0; try { mountEntry(); mountTarifas(); } catch {} }, 60);
+  });
+  mo.observe(document.documentElement, { childList:true, subtree:true });
+
+  window.Parkops166 = { version:V, servicios, aplicarIVA, decorar, ensure, pintarEntrada };
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+else init();
+
+})();
+
+</script>
+<!-- parkops-web-1.0.js -->
+<script>
+/* ============================================================================
+   PARKOPS · SOLVEX SYSTEM JB S.A.S.
+   Capa web v1.0 — adapta la versión 1.6.6 para correr en cualquier navegador
+
+   Qué hace:
+   1. Añade al final de Ajustes el "Centro de descargas y accesos": los dos APK
+      y el enlace a la consola de licencias, igual que en la app de cotizaciones.
+   2. Marca en la cabecera que se está usando la versión web.
+   3. Sustituye los puentes propios de Android que aquí no existen:
+      · El cobro con app de pagos (AndroidPagos) no está en el navegador: se
+        muestran los datos para copiar, que es lo que el operario necesita.
+      · Guardar y compartir archivos usa la descarga normal del navegador.
+   4. Permite instalar la página en la pantalla de inicio del celular.
+
+   CONFIGURACIÓN: edite el bloque RUTAS de abajo con las direcciones reales
+   donde publique cada archivo. Si deja los tres archivos en la misma carpeta
+   del servidor, los valores por defecto ya funcionan.
+   ========================================================================== */
+(() => {
+'use strict';
+
+const V = 'web-1.0';
+
+/* ── RUTAS · edite aquí ──────────────────────────────────────────────────── */
+const RUTAS = {
+  apkOperacion : './PARKOPS-OPERACION-v1_6_6.apk',
+  apkLicencias : './SOLVEX-LICENCIAS-v1_4_0.apk',
+  consolaLic   : './licencias.html'
+};
+/* ───────────────────────────────────────────────────────────────────────── */
+
+const $ = s => document.querySelector(s);
+const esc = v => String(v == null ? '' : v)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function toast(m, t = 'ok'){ if (typeof avisar === 'function') avisar(m, t); }
+
+const EN_PREVIA = /claude\.ai$|claudeusercontent\.com$/.test(location.hostname);
+
+/* La clase .btn trae display:block, que gana sobre el atributo hidden del
+   navegador. Sin esta regla, un botón oculto se seguiría viendo. */
+(function estilos(){
+  if (document.getElementById('estilosWeb10')) return;
+  const s = document.createElement('style');
+  s.id = 'estilosWeb10';
+  s.textContent = '.btn[hidden],a.btn[hidden]{display:none!important}'
+    + '#centroWeb a.btn{text-decoration:none}';
+  document.head.appendChild(s);
+})();
+
+/* ── Marca de versión web en la cabecera ────────────────────────────────── */
+function marcarWeb(){
+  if ($('#webBadge')) return;
+  const h = document.querySelector('header'); if (!h) return;
+  const b = document.createElement('span');
+  b.id = 'webBadge';
+  b.textContent = 'web';
+  b.style.cssText = 'margin-left:7px;font-size:10px;padding:2px 7px;border-radius:20px;'
+    + 'background:#2a3340;color:var(--tinta2);letter-spacing:.05em;flex:none';
+  h.appendChild(b);
+}
+
+/* ── Centro de descargas y accesos ──────────────────────────────────────── */
+function mountCentro(){
+  const vista = $('#v-ajustes');
+  if (!vista || $('#centroWeb')) return;
+
+  const d = document.createElement('details');
+  d.className = 'acordeon';
+  d.id = 'centroWeb';
+  d.innerHTML = `
+    <summary>Aplicaciones y accesos</summary>
+    <div class="cuerpo">
+      <p class="nota" style="margin-bottom:14px;text-transform:none">
+        Esta misma operación funciona en el navegador y en el celular. Los datos de cada
+        una son independientes: lo que registre aquí no aparece en la app instalada.</p>
+
+      <div class="sep"></div>
+      <h3 style="margin:0 0 4px;font-size:15px">Para el operario de la caseta</h3>
+      <p class="nota" style="margin-bottom:10px;text-transform:none">
+        Instale esta aplicación en el celular que va a trabajar sin internet.</p>
+      <a class="btn" id="dlOperacion" href="${esc(RUTAS.apkOperacion)}" download
+         style="display:block;text-align:center;text-decoration:none;margin-bottom:6px">
+         Descargar PARKOPS Operación 1.6.6</a>
+      <p class="nota" style="margin-bottom:16px;text-transform:none">
+        Android pedirá permiso para instalar desde el navegador. Es normal: la aplicación
+        no está en Play Store porque es de uso propio.</p>
+
+      <div class="sep"></div>
+      <h3 style="margin:0 0 4px;font-size:15px">Para el propietario y el administrador de sedes</h3>
+      <p class="nota" style="margin-bottom:10px;text-transform:none">
+        Desde aquí se registran los clientes y se generan las licencias que activan cada
+        celular. El propietario ve todo; el administrador de sedes gestiona clientes y
+        licencias con su propio usuario.</p>
+      <a class="btn sec" id="abrirLic" href="${esc(RUTAS.consolaLic)}" target="_blank" rel="noopener"
+         style="display:block;text-align:center;text-decoration:none;margin-bottom:6px">
+         Abrir la consola de licencias</a>
+      <a class="btn sec" id="dlLicencias" href="${esc(RUTAS.apkLicencias)}" download
+         style="display:block;text-align:center;text-decoration:none">
+         Descargar SOLVEX Licencias 1.4.0</a>
+
+      <div class="sep"></div>
+      <h3 style="margin:0 0 8px;font-size:15px">Quién usa cada cosa</h3>
+      <div class="scroll"><table>
+        <thead><tr><th>Persona</th><th>Herramienta</th></tr></thead>
+        <tbody>
+          <tr><td>Operario de caseta</td><td>PARKOPS Operación, en el celular</td></tr>
+          <tr><td>Supervisor en sitio</td><td>Esta misma página, en cualquier navegador</td></tr>
+          <tr><td>Propietario del parqueadero</td><td>Consola de licencias, con su usuario</td></tr>
+          <tr><td>Administrador de sedes</td><td>Consola de licencias, con usuario de administrador</td></tr>
+        </tbody></table></div>
+
+      <div class="sep"></div>
+      <button class="btn sec" id="btnInstalarWeb" hidden>Instalar esta página en el celular</button>
+      <p class="nota" id="notaInstalar" style="text-transform:none">
+        En el celular puede añadir esta página a la pantalla de inicio desde el menú del
+        navegador; se abre como una aplicación más.</p>
+    </div>`;
+  vista.appendChild(d);
+
+  if (EN_PREVIA){
+    ['dlOperacion','dlLicencias','abrirLic'].forEach(id => {
+      const a = $('#'+id); if (!a) return;
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        toast('La vista previa no descarga archivos. Funciona al publicarlo en su dominio.', 'err');
+      });
+    });
+    d.querySelector('.cuerpo').insertAdjacentHTML('afterbegin',
+      `<p class="legal" style="margin-bottom:12px">Está viendo la vista previa. Los botones de
+        descarga quedan activos cuando publique esta página en su servidor, con los dos APK
+        y la consola de licencias en la misma carpeta.</p>`);
+  }
+
+  if (botonInstalar) prepararInstalacion();
+}
+
+/* ── Instalación en pantalla de inicio ──────────────────────────────────── */
+let botonInstalar = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  botonInstalar = e;
+  prepararInstalacion();
+});
+function prepararInstalacion(){
+  const b = $('#btnInstalarWeb'); if (!b || !botonInstalar) return;
+  b.hidden = false;
+  const n = $('#notaInstalar');
+  if (n) n.textContent = 'Se instala como una aplicación más, con su propio ícono.';
+  b.onclick = async () => {
+    try { botonInstalar.prompt(); await botonInstalar.userChoice; botonInstalar = null; b.hidden = true; }
+    catch {}
+  };
+}
+
+/* ── Sustitutos de los puentes de Android ───────────────────────────────── */
+
+/* Guardar archivo: en el celular lo hacía AndroidBridge; aquí, descarga normal. */
+if (typeof window.bajar !== 'function'){
+  window.bajar = function(contenido, nombre, tipo){
+    try {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([contenido], { type: tipo || 'text/plain' }));
+      a.download = nombre || 'parkops.txt';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    } catch { toast('Este navegador no permitió descargar el archivo', 'err'); }
+  };
+}
+
+/* En el navegador no existe la app de pagos: se muestran los datos para copiar. */
+function ajustarPagos(){
+  const cont = $('#rPagosApps');
+  if (!cont || cont.dataset.web === '1') return;
+  if (window.AndroidPagos && window.AndroidPagos.pagar) return;  // está en el celular
+  cont.dataset.web = '1';
+  const nota = $('#rPagosNota');
+  if (nota){
+    nota.hidden = false;
+    nota.textContent = 'Desde el navegador no se abre la app de pagos. Los datos van en el '
+      + 'recibo de WhatsApp para que el cliente pague desde su propio celular.';
+  }
+}
+
+/* ── Arranque ───────────────────────────────────────────────────────────── */
+function init(){
+  if (!document.querySelector('header')){ setTimeout(init, 150); return; }
+  marcarWeb();
+  mountCentro();
+  ajustarPagos();
+
+  let pend = 0;
+  const mo = new MutationObserver(() => {
+    if (pend) return;
+    if ($('#centroWeb') && $('#webBadge')) { ajustarPagos(); return; }
+    pend = setTimeout(() => { pend = 0; try { marcarWeb(); mountCentro(); ajustarPagos(); } catch {} }, 70);
+  });
+  mo.observe(document.documentElement, { childList:true, subtree:true });
+
+  window.ParkopsWeb = { version:V, rutas:RUTAS };
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+else init();
+
+})();
+
+</script>
+</body>
+</html>
