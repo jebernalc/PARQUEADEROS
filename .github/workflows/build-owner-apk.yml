@@ -3,7 +3,7 @@ name: Build SOLVEX Owner License Manager APK
 on:
   workflow_dispatch:
   push:
-    branches: [main, owner-v1.4.0-delete-license]
+    branches: [main, owner-v1.4.1-delete-license]
     paths:
       - "ownerapp/**"
       - "supabase/functions/parkops-master/**"
@@ -19,11 +19,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate owner manager v1.4.0
+      - name: Validate owner manager v1.4.1
         shell: bash
         run: |
           grep -q 'applicationId "com.solvex.parkops.owner"' ownerapp/build.gradle
-          grep -q 'versionName "1.4.0"' ownerapp/build.gradle
+          grep -q 'versionName "1.4.1"' ownerapp/build.gradle
           grep -q 'jbernalcristancho82@hotmail.com' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
           grep -q 'CREAR / ACTIVAR NUEVA CUENTA' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
           grep -q '/auth/v1/signup' ownerapp/src/main/java/com/solvex/parkops/owner/MainActivity.java
@@ -70,11 +70,11 @@ jobs:
         shell: bash
         run: |
           mkdir -p release-owner
-          cp ownerapp/build/outputs/apk/debug/ownerapp-debug.apk release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.4.0.apk
-          sha256sum release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.4.0.apk > release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.4.0.sha256
+          cp ownerapp/build/outputs/apk/debug/ownerapp-debug.apk release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.4.1.apk
+          sha256sum release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.4.1.apk > release-owner/SOLVEX-OWNER-LICENSE-MANAGER-v1.4.1.sha256
 
       - uses: actions/upload-artifact@v4
         with:
-          name: SOLVEX-OWNER-LICENSE-MANAGER-v1.4.0
+          name: SOLVEX-OWNER-LICENSE-MANAGER-v1.4.1
           path: release-owner/
           if-no-files-found: error
