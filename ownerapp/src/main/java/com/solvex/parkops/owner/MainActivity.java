@@ -89,7 +89,7 @@ public class MainActivity extends Activity {
     }
 
     private void recoverPassword(String email,Button button){
-        try{request("POST",SUPABASE_URL+"/auth/v1/recover",new JSONObject().put("email",email),false);toast("Correo de recuperación solicitado. Revisa la bandeja y spam de "+email+".");}
+        try{String redirect=java.net.URLEncoder.encode("https://jebernalc.github.io/PARQUEADEROS/owner/reset.html","UTF-8");request("POST",SUPABASE_URL+"/auth/v1/recover?redirect_to="+redirect,new JSONObject().put("email",email),false);toast("Solicitud enviada. Abre el correo de recuperación en tu navegador y establece una nueva contraseña. Revisa spam.");}
         catch(Exception e){toast("No se pudo solicitar la recuperación: "+e.getMessage());}
         finally{runOnUiThread(()->button.setEnabled(true));}
     }
